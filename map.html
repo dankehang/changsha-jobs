@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>长沙兼职地图 - 以您为中心</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+
+    /* 头部 */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header h1 { font-size: 18px; font-weight: 600; }
+    .header .subtitle { font-size: 12px; opacity: 0.9; margin-top: 3px; }
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* 统计栏 */
+    .stats-bar {
+      background: white;
+      padding: 12px 15px;
+      position: fixed;
+      top: 70px; left: 0; right: 0;
+      z-index: 999;
+      display: flex;
+      justify-content: space-around;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      font-size: 13px;
+    }
+    .stat-item { text-align: center; }
+    .stat-value { color: #667eea; font-weight: 700; font-size: 16px; }
+    .stat-label { color: #888; font-size: 11px; margin-top: 2px; }
+
+    /* 地图容器 */
+    #map-container {
+      position: fixed;
+      top: 125px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #e0e0e0;
+    }
+
+    /* 信息窗口样式 */
+    .info-window {
+      padding: 10px;
+      max-width: 280px;
+      font-size: 13px;
+    }
+    .info-window h3 {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .info-window .salary {
+      color: #e53935;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .info-window .address {
+      color: #666;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .info-window .district {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+    .info-window .wechat {
+      color: #4caf50;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .info-window .btn-copy {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 6px 15px;
+      border-radius: 15px;
+      font-size: 12px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* 图例 */
+    .legend {
+      position: fixed;
+      bottom: 20px;
+      right: 15px;
+      background: white;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 998;
+      font-size: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .legend-item:last-child { margin-bottom: 0; }
+    .legend-icon {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .legend-home { background: #ff5722; }
+    .legend-job { background: #667eea; }
+
+    /* 加载提示 */
+    .loading {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      z-index: 2000;
+      text-align: center;
+    }
+    .loading i { font-size: 30px; margin-bottom: 10px; display: block; }
+
+    /* 错误提示 */
+    .error-msg {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+      z-index: 2000;
+      text-align: center;
+      max-width: 300px;
+    }
+    .error-msg i { font-size: 40px; color: #ff5722; margin-bottom: 15px; }
+    .error-msg h3 { margin-bottom: 10px; }
+    .error-msg p { color: #666; font-size: 13px; margin-bottom: 15px; }
+    .error-msg button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    /* 筛选栏 */
+    .filter-bar {
+      position: fixed;
+      top: 125px;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 8px 15px;
+      z-index: 997;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .filter-btn {
+      background: #f0f0f0;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: #667eea;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- 头部 -->
+  <div class="header">
+    <div class="header-content">
+      <div>
+        <h1><i class="fas fa-map-marked-alt"></i> 长沙兼职地图</h1>
+        <div class="subtitle">以润和国际广场为中心</div>
+      </div>
+      <button class="back-btn" onclick="location.href='index.html'">
+        <i class="fas fa-arrow-left"></i> 返回列表
+      </button>
+    </div>
+  </div>
+
+  <!-- 统计栏 -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-value" id="total-jobs">266</div>
+      <div class="stat-label">兼职总数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="nearby-jobs">-</div>
+      <div class="stat-label">3公里内</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="center-name">开福区</div>
+      <div class="stat-label">中心位置</div>
+    </div>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-district="全部">全部区域</button>
+    <button class="filter-btn" data-district="开福区">开福区</button>
+    <button class="filter-btn" data-district="芙蓉区">芙蓉区</button>
+    <button class="filter-btn" data-district="天心区">天心区</button>
+    <button class="filter-btn" data-district="岳麓区">岳麓区</button>
+    <button class="filter-btn" data-district="雨花区">雨花区</button>
+    <button class="filter-btn" data-district="长沙县">长沙县</button>
+    <button class="filter-btn" data-district="望城区">望城区</button>
+    <button class="filter-btn" data-district="多区域">多区域</button>
+  </div>
+
+  <!-- 地图容器 -->
+  <div id="map-container"></div>
+
+  <!-- 图例 -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-icon legend-home"></div>
+      <span>您的位置</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-icon legend-job"></div>
+      <span>兼职岗位</span>
+    </div>
+  </div>
+
+  <!-- 加载提示 -->
+  <div class="loading" id="loading">
+    <i class="fas fa-spinner fa-spin"></i>
+    <div>正在加载地图...</div>
+  </div>
+
+  <!-- 高德地图 API 1.4.15 版本 -->
+  <script src="https://webapi.amap.com/maps?v=1.4.15&key=761ed01bf7dab600b9fff5f0c292510b"></script>
+
+  <script>
+    // 中心位置：润和国际广场
+    const CENTER_POSITION = [112.9388, 28.2281];
+    const CENTER_NAME = '润和国际广场';
+
+    // 兼职数据（266条真实数据，含精确坐标）
+    const jobsData = [
+{id:1,title:'零食店理货员',salary:'120元/天',area:'芙蓉广场地铁站附近',district:'芙蓉区',wechat:'Catbb0529',lng:112.989598,lat:28.195347},
+{id:2,title:'餐饮店服务生',salary:'120元/天+包3餐',area:'万家丽/洋湖湿地/梅溪湖/五一广场等',district:'多区域',wechat:'Catbb0529',lng:112.978103,lat:28.198788},
+{id:3,title:'电视剧拍摄群演',salary:'80元/天+管饭管水',area:'贺龙体育馆/星沙地铁站/五一广场',district:'多区域',wechat:'Catbb0529',lng:112.979488,lat:28.197427},
+{id:4,title:'零食很忙/零食王国',salary:'130-150元/天',area:'雨花区超级零食很忙/芙蓉广场零食王国',district:'雨花区',wechat:'sleepyhead997',lng:112.990437,lat:28.194025},
+{id:5,title:'特产打包补货',salary:'100-180元/天',area:'黄兴广场/五一广场',district:'天心区',wechat:'sleepyhead997',lng:112.977207,lat:28.198121},
+{id:6,title:'鬼屋/剧本杀NPC',salary:'220元/天',area:'全长沙多门店',district:'多区域',wechat:'未提供',lng:112.978789,lat:28.179036},
+{id:7,title:'物料装袋',salary:'110元/天+包餐水',area:'贺龙体育馆',district:'天心区',wechat:'Lovoecat033',lng:112.979124,lat:28.177729},
+{id:8,title:'化妆品包装',salary:'白班16-18/h晚班17-20/h',area:'岳麓区丰树物流园2期/宇培物流园',district:'岳麓区',wechat:'sleepyhead997',lng:112.890852,lat:28.220429},
+{id:9,title:'24h图书馆',salary:'160-200元/天+包午饭',area:'黄兴广场/德思勤/湖南图书馆',district:'多区域',wechat:'19375173727',lng:112.9796,lat:28.189449},
+{id:10,title:'零食很大',salary:'220元/天',area:'雨花区/星沙/芙蓉区/岳麓区',district:'多区域',wechat:'Yunyun525888',lng:113.079577,lat:28.251119},
+{id:11,title:'兼职服务员',salary:'120元/天+包3餐',area:'开福万达/梅溪湖金茂/五一广场国金等',district:'多区域',wechat:'sleepyhead997',lng:112.968882,lat:28.199366},
+{id:12,title:'侯家塘贺龙安保',salary:'有证外场140/内场120',area:'侯家塘贺龙附近',district:'天心区',wechat:'li17873991112',lng:112.979633,lat:28.174715},
+{id:13,title:'雨花区超市坐班',salary:'130元/天+包餐水',area:'雨花区超市',district:'雨花区',wechat:'W-2025-10-1',lng:113.032051,lat:28.136411},
+{id:14,title:'长沙县协助',salary:'130元/天+包餐包水',area:'长沙县',district:'长沙县',wechat:'BINAO66666666',lng:113.080413,lat:28.245348},
+{id:15,title:'电影院检票员',salary:'180元/天+包餐',area:'五一广场附近',district:'芙蓉区',wechat:'Bravesteadfast',lng:112.979436,lat:28.197774},
+{id:16,title:'玩偶扮演',salary:'170元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'ZHX2069875387',lng:113.031005,lat:28.189914},
+{id:17,title:'饿了么校园活动',salary:'120元/天',area:'湖南工商大学',district:'岳麓区',wechat:'CCTY699',lng:112.919323,lat:28.208739},
+{id:18,title:'火车站女安检员',salary:'150元/班次周结',area:'长沙火车站',district:'芙蓉区',wechat:'ccd66828',lng:113.008734,lat:28.197221},
+{id:19,title:'路演日结',salary:'80元/场',area:'保利天禧',district:'岳麓区',wechat:'wan17735341610',lng:112.934473,lat:28.213035},
+{id:20,title:'开福区游乐园巡场',salary:'面议',area:'开福区',district:'开福区',wechat:'syxx030407',lng:112.982744,lat:28.256},
+{id:21,title:'雨花电商打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园',district:'雨花区',wechat:'chang07098818',lng:113.046474,lat:28.154979},
+{id:22,title:'星沙汽配厂周结',salary:'17.5-21.5元/时',area:'星沙',district:'长沙县',wechat:'18932416326',lng:113.078768,lat:28.250628},
+{id:23,title:'中联重科普工/叉车工',salary:'20-22元/时',area:'岳麓区谢家桥地铁站附近',district:'岳麓区',wechat:'yhuaiyu6885',lng:112.865917,lat:28.225664},
+{id:24,title:'花店打杂',salary:'18元/小时+包吃',area:'多区域',district:'多区域',wechat:'nian0618nian',lng:112.979005,lat:28.179641},
+{id:25,title:'花店打包',salary:'10元/小时+包餐',area:'涉外经济学院附近',district:'岳麓区',wechat:'XQZ512-23M',lng:112.909183,lat:28.175631},
+{id:26,title:'5.23贺龙安保',salary:'有证外场140/内场120',area:'侯家塘贺龙体育场',district:'天心区',wechat:'15211050779',lng:112.980371,lat:28.173882},
+{id:27,title:'会议引导',salary:'150元/天',area:'开福区万达广场附近',district:'开福区',wechat:'VYJKL888',lng:112.970119,lat:28.199267},
+{id:28,title:'周末活动助手',salary:'150元/天+包饭包水',area:'五一广场附近君悦酒店',district:'芙蓉区',wechat:'wanshishunsui_zhao',lng:112.978165,lat:28.197214},
+{id:29,title:'教培发传单',salary:'半天40元/一天80元+提成',area:'德思勤',district:'雨花区',wechat:'Xia071704',lng:113.009265,lat:28.129718},
+{id:30,title:'中餐厅服务生',salary:'220元/天+包餐',area:'多区域',district:'多区域',wechat:'ttgg_laiiy1223',lng:112.981171,lat:28.179114},
+{id:31,title:'餐饮兼职服务员',salary:'15元/小时+包两餐',area:'多区域',district:'多区域',wechat:'c516930805',lng:112.981266,lat:28.178599},
+{id:32,title:'杀虫帮忙',salary:'140元/天+包水',area:'多区域',district:'多区域',wechat:'wbzdq99',lng:112.980537,lat:28.178782},
+{id:33,title:'新氧医美体验',salary:'15元+洗脸护肤体验',area:'新氧长沙世贸店/德思勤店/北辰店',district:'多区域',wechat:'fy122165',lng:113.011441,lat:28.129707},
+{id:34,title:'望城远博云仓',salary:'15元/小时',area:'望城远博云仓',district:'望城区',wechat:'MM020066688',lng:112.817765,lat:28.360247},
+{id:35,title:'电商仓库猫粮打包',salary:'16元/小时',area:'多区域',district:'多区域',wechat:'L198426730',lng:112.979129,lat:28.179639},
+{id:36,title:'妈妈驿站临时工',salary:'20元/小时',area:'福元大桥西地铁口150米',district:'开福区',wechat:'lh273056199',lng:112.919953,lat:28.240913},
+{id:37,title:'文艺活动现场助理',salary:'180元/天+包餐水',area:'多区域',district:'多区域',wechat:'MM020066688',lng:112.979512,lat:28.179696},
+{id:38,title:'景区新媒体运营',salary:'120元/天周结',area:'橘子洲景区',district:'岳麓区',wechat:'Xia062206',lng:112.96075,lat:28.185578},
+{id:39,title:'岳麓宇培御泥坊',salary:'15元/小时+包中餐',area:'长沙宇培物流园w2仓',district:'岳麓区',wechat:'ch10186437',lng:112.886126,lat:28.216449},
+{id:40,title:'望城普洛斯',salary:'15元/小时',area:'望城普洛斯物流园',district:'望城区',wechat:'ch10186437',lng:112.817554,lat:28.360573},
+{id:41,title:'星沙邮政分拣',salary:'160元/天',area:'星沙',district:'长沙县',wechat:'a2545969810',lng:113.079717,lat:28.251225},
+{id:42,title:'长沙县零食打包',salary:'18元/小时',area:'夸特纳斯长沙智慧冷链产业园',district:'长沙县',wechat:'17674048697',lng:113.083387,lat:28.24453},
+{id:43,title:'望城马桥河路远博云仓',salary:'打包15/时装卸18/时',area:'望城马桥河路远博云仓',district:'望城区',wechat:'15507390427',lng:112.815953,lat:28.360444},
+{id:44,title:'丰树御泥坊',salary:'16元/小时+包中晚2餐',area:'岳麓区丰树物流园一期拙燕仓',district:'岳麓区',wechat:'18163669468',lng:112.889137,lat:28.21899},
+{id:45,title:'麓谷电子厂',salary:'20元/小时',area:'岳麓区麓谷电子厂',district:'岳麓区',wechat:'19973119390',lng:112.87011,lat:28.229859},
+{id:46,title:'英雄联盟游戏兼职',salary:'30元',area:'雅雀湖附近/扬帆小区附近',district:'多区域',wechat:'LIVE0011TT',lng:112.980234,lat:28.181386},
+{id:47,title:'金茂售楼处保安',salary:'日结140+20全勤',area:'岳麓区象鼻窝地铁站附近',district:'岳麓区',wechat:'17752892767',lng:112.875422,lat:28.219205},
+{id:48,title:'短视频群演',salary:'160元/次',area:'天心区五一广场附近',district:'天心区',wechat:'QHGZS2022',lng:112.978923,lat:28.196925},
+{id:49,title:'芙蓉广场零食店长期',salary:'160元/天+包中晚餐',area:'芙蓉广场零食店',district:'芙蓉区',wechat:'wenwen_5890',lng:112.990764,lat:28.19432},
+{id:50,title:'望城比亚迪',salary:'综合5500-6500元/月',area:'望城比亚迪',district:'望城区',wechat:'wenwen_5890',lng:112.818086,lat:28.359252},
+{id:51,title:'小区保安短期',salary:'120元/天+包吃包住',area:'岳麓区/开福区/天心区/长沙县等',district:'多区域',wechat:'tmumul888',lng:113.080477,lat:28.244845},
+{id:52,title:'娃娃机补货',salary:'180元/天+包餐水',area:'万家丽国际购物广场/友阿百货/开福万达广场',district:'多区域',wechat:'Bravesteadfast',lng:112.969624,lat:28.199944},
+{id:53,title:'周末活动助手',salary:'150元/天+包饭包水',area:'五一广场附近君悦酒店',district:'芙蓉区',wechat:'wanshishunsui_zhao',lng:112.976858,lat:28.196824},
+{id:54,title:'火车站女安检员',salary:'150元/班次周结',area:'长沙火车站',district:'芙蓉区',wechat:'ccd66828',lng:113.010629,lat:28.195814},
+{id:55,title:'排队充场',salary:'150元',area:'五一广场国金街',district:'芙蓉区',wechat:'MM020066688',lng:112.979155,lat:28.197172},
+{id:56,title:'电影检票员',salary:'150元/天',area:'多区域',district:'多区域',wechat:'wan17735341610',lng:112.981448,lat:28.180156},
+{id:57,title:'雨花区物流分拣',salary:'150-165元/天',area:'雨花区申通附近',district:'雨花区',wechat:'18684939710',lng:113.031932,lat:28.137628},
+{id:58,title:'长沙县小件扫描',salary:'分拣160/装卸180/天',area:'大地国际',district:'长沙县',wechat:'chang07098818',lng:113.091055,lat:28.255298},
+{id:59,title:'书店打杂',salary:'130元',area:'五一广场',district:'芙蓉区',wechat:'lh273056199',lng:112.97873,lat:28.197399},
+{id:60,title:'杀虫帮忙',salary:'140元+包水',area:'多区域',district:'多区域',wechat:'wbzdq99',lng:112.98053,lat:28.179154},
+{id:61,title:'雨花万纬水果榴莲',salary:'18元/时',area:'雨花区万纬',district:'雨花区',wechat:'nian0618nian',lng:113.034386,lat:28.138683},
+{id:62,title:'地推兼职',salary:'150元+表现奖',area:'恰同学少年广场',district:'多区域',wechat:'h81213_146',lng:112.979226,lat:28.178826},
+{id:63,title:'电竞赛事执行',salary:'150元/场',area:'岳麓区梅溪湖电竞文化中心',district:'岳麓区',wechat:'lh273056199',lng:112.879156,lat:28.208767},
+{id:64,title:'小酒馆服务员',salary:'180元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'lcllb33',lng:113.028724,lat:28.191393},
+{id:65,title:'新氧医美体验',salary:'15元+洗脸护肤体验',area:'新氧长沙世贸店/德思勤店/北辰店',district:'多区域',wechat:'fy122165',lng:113.010513,lat:28.130656},
+{id:66,title:'花店帮忙',salary:'140元/天',area:'芙蓉区浏城桥花店',district:'芙蓉区',wechat:'15674983662',lng:113.033729,lat:28.188973},
+{id:67,title:'密室逃脱NPC',salary:'220元/天',area:'岳麓区/开福区/天心区/芙蓉区',district:'多区域',wechat:'Tsy283222',lng:112.978609,lat:28.178537},
+{id:68,title:'长沙急招多岗位',salary:'12-20元/时或130-220元/天',area:'芙蓉/天心/岳麓/开福/雨花/长沙县',district:'多区域',wechat:'ax20251215',lng:113.079962,lat:28.245586},
+{id:69,title:'开福区菜鸟日结',salary:'16元/小时+包餐',area:'开福区深国际物流园',district:'开福区',wechat:'e15974298550',lng:112.983131,lat:28.255416},
+{id:70,title:'线上普通话录制',salary:'30元',area:'线上',district:'线上',wechat:'llllli66668',lng:112.937433,lat:28.227888},
+{id:71,title:'五一广场国金附近保安',salary:'10元/小时+10车补',area:'五一广场5号地铁口集合',district:'芙蓉区',wechat:'syxx030407',lng:112.976504,lat:28.19948},
+{id:72,title:'柠季助推',salary:'140元+车补10',area:'国金',district:'芙蓉区',wechat:'K2401418815',lng:112.978149,lat:28.196763},
+{id:73,title:'花店兼职',salary:'160元/天+包餐水',area:'黄兴广场/德思勤等',district:'多区域',wechat:'19095676672',lng:112.978501,lat:28.191426},
+{id:74,title:'零食很大',salary:'220元/天',area:'雨花区/星沙/芙蓉区/岳麓区/长沙县',district:'多区域',wechat:'19095676672',lng:113.079242,lat:28.249215},
+{id:75,title:'雨花区宝湾物流电商',salary:'退货19/时打包17-19/时',area:'雨花区宝湾物流园（长沙高铁南站附近）',district:'雨花区',wechat:'17508553638',lng:113.070821,lat:28.14976},
+{id:76,title:'雨花区超市坐班',salary:'140元/天+包餐水',area:'雨花区超市',district:'雨花区',wechat:'W-2025-10-1',lng:113.034447,lat:28.13621},
+{id:77,title:'天心区特产打包',salary:'100-180元/天',area:'黄兴广场/五一广场',district:'天心区',wechat:'sleepyhead997',lng:112.977254,lat:28.197648},
+{id:78,title:'岳麓区活动协助',salary:'130元/天+包餐',area:'岳麓区',district:'岳麓区',wechat:'BINAO66666666',lng:112.934734,lat:28.212282},
+{id:79,title:'望城京东日结',salary:'15元/小时',area:'京东亚洲一号物流园',district:'望城区',wechat:'xi-xi-dd1',lng:112.817796,lat:28.361215},
+{id:80,title:'卡通尼儿童乐园',salary:'130元/天',area:'长沙荟聚',district:'岳麓区',wechat:'lijie998802',lng:112.934706,lat:28.213528},
+{id:81,title:'侯家塘贺龙安保',salary:'有证外场140/内场120',area:'侯家塘贺龙附近',district:'天心区',wechat:'li17873991112',lng:112.980473,lat:28.174019},
+{id:82,title:'京东快递电商打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园/万纬物流园',district:'雨花区',wechat:'Yunyun525888',lng:113.051182,lat:28.138966},
+{id:83,title:'零食很大',salary:'220元/天',area:'雨花区/星沙/芙蓉区/岳麓区/长沙县',district:'多区域',wechat:'19375173727',lng:113.080138,lat:28.250146},
+{id:84,title:'长沙县小件扫描',salary:'分拣160/装卸180/天',area:'大地国际',district:'长沙县',wechat:'chang07098818',lng:113.088741,lat:28.255089},
+{id:85,title:'短视频群演',salary:'160元/次',area:'天心区五一广场附近',district:'天心区',wechat:'QHGZS2022',lng:112.977584,lat:28.197411},
+{id:86,title:'会议引导',salary:'150元/天',area:'开福区万达广场附近',district:'开福区',wechat:'VYJKL888',lng:112.969241,lat:28.20003},
+{id:87,title:'会议布置',salary:'120元/天',area:'中南大学',district:'岳麓区',wechat:'a8851788',lng:112.934262,lat:28.214277},
+{id:88,title:'长沙急招多岗位',salary:'12-20元/时或130-220元/天',area:'芙蓉/天心/岳麓/开福/雨花/长沙县',district:'多区域',wechat:'ax20251215',lng:113.081179,lat:28.245701},
+{id:89,title:'东百可乐打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园',district:'雨花区',wechat:'e15974298550',lng:113.045002,lat:28.155931},
+{id:90,title:'芙蓉区婚礼打杂',salary:'180元/天+包吃',area:'芙蓉区',district:'芙蓉区',wechat:'Bravesteadfast',lng:113.034555,lat:28.189985},
+{id:91,title:'星沙邮政分拣',salary:'160元/天',area:'星沙',district:'长沙县',wechat:'a2545969810',lng:113.080379,lat:28.249679},
+{id:92,title:'活动助手',salary:'150元/天+包餐水',area:'黄兴广场附近',district:'天心区',wechat:'K2401418815',lng:112.979811,lat:28.190363},
+{id:93,title:'湘江欢乐城暑假工',salary:'综合3000元+包吃包住',area:'岳麓区大王山湘江欢乐城景区',district:'岳麓区',wechat:'19973119390',lng:112.932113,lat:28.214576},
+{id:94,title:'运动品牌打包',salary:'22元/小时',area:'多区域',district:'多区域',wechat:'gg260105',lng:112.980148,lat:28.180512},
+{id:95,title:'雨花区医疗器材厂',salary:'16元/时+包吃三餐',area:'雨花区振东路可孚总部基地',district:'雨花区',wechat:'cyyco1016',lng:113.033931,lat:28.13691},
+{id:96,title:'小区保安短期',salary:'120元/天+包吃包住',area:'岳麓区/开福区/天心区/长沙县/雨花区/芙蓉区',district:'多区域',wechat:'tmumul888',lng:113.079672,lat:28.244816},
+{id:97,title:'湘江欢乐城暑假工',salary:'2500-3000元+包吃住',area:'岳麓区欢乐城景区',district:'岳麓区',wechat:'WQ13077192075WQ',lng:112.932479,lat:28.213988},
+{id:98,title:'肯德基兼职',salary:'14-18.5元/小时',area:'全湖南省多门店就近安排',district:'多区域',wechat:'MiManchi-SanSui',lng:112.980413,lat:28.178952},
+{id:99,title:'山姆会员店',salary:'21-22元/小时',area:'岳麓区',district:'岳麓区',wechat:'qiaozhiyou555',lng:112.931869,lat:28.212001},
+{id:100,title:'北辰国际会议中心活动',salary:'100元/天+包餐包水',area:'开福区北辰国际会议中心',district:'开福区',wechat:'yj5181988',lng:112.984111,lat:28.255402},
+{id:101,title:'京东快递电商打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园/万纬物流园',district:'雨花区',wechat:'Yunyun525888',lng:113.05096,lat:28.140805},
+{id:102,title:'芙蓉区婚礼打杂',salary:'180元/天+包吃',area:'芙蓉区',district:'芙蓉区',wechat:'Bravesteadfast',lng:113.034502,lat:28.191085},
+{id:103,title:'密室逃脱',salary:'170元/天+包餐',area:'全长沙可就近安排',district:'多区域',wechat:'jianlai123nb',lng:112.979184,lat:28.181028},
+{id:104,title:'长沙县电商仓库',salary:'17元/小时',area:'长沙县',district:'长沙县',wechat:'ccd66828',lng:113.080256,lat:28.245632},
+{id:105,title:'花店兼职',salary:'140元/天+包餐水',area:'五一广场/德思勤等',district:'多区域',wechat:'19084639214',lng:112.977834,lat:28.196754},
+{id:106,title:'顺丰小件锁包',salary:'185元/天+包工作餐',area:'长沙县环通物流园',district:'长沙县',wechat:'1149931216',lng:113.079612,lat:28.246016},
+{id:107,title:'超市搬运工',salary:'200元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'lcllb33',lng:113.029306,lat:28.190617},
+{id:108,title:'望城坐班电子厂',salary:'21元/小时',area:'望城区',district:'望城区',wechat:'yhuaiyu6885',lng:112.818151,lat:28.35907},
+{id:109,title:'VR体验馆',salary:'160元/天+包餐水',area:'多区域',district:'多区域',wechat:'jzr224456',lng:112.980368,lat:28.18107},
+{id:110,title:'会议引导',salary:'150元/天',area:'开福区万达广场附近',district:'开福区',wechat:'yzdddi',lng:112.970503,lat:28.201429},
+{id:111,title:'图书馆',salary:'160元/天+包午饭',area:'黄兴广场/德思勤/湖南图书馆',district:'多区域',wechat:'jf1817553532',lng:112.981394,lat:28.189027},
+{id:112,title:'蛋糕店打包',salary:'16元/小时',area:'罐子岭地铁口',district:'望城区',wechat:'fy122165',lng:112.816,lat:28.360715},
+{id:113,title:'东百可乐打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园',district:'雨花区',wechat:'e15974298550',lng:113.046223,lat:28.15564},
+{id:114,title:'湘江欢乐城暑假工',salary:'综合3000元+包吃包住',area:'岳麓区大王山湘江欢乐城景区',district:'岳麓区',wechat:'19973119390',lng:112.934105,lat:28.213087},
+{id:115,title:'灵官渡安保',salary:'140元/天',area:'灵官渡地铁站附近',district:'天心区',wechat:'luoqilin555',lng:112.989082,lat:28.108675},
+{id:116,title:'餐饮店服务生',salary:'120元/天+包3餐',area:'万家丽/洋湖湿地/月亮岛西/梅溪湖等',district:'多区域',wechat:'Catbb0529',lng:113.031295,lat:28.189822},
+{id:117,title:'长沙县协助',salary:'130元/天+包餐包水',area:'长沙县',district:'长沙县',wechat:'BINAO66666666',lng:113.081324,lat:28.244579},
+{id:118,title:'零食店理货',salary:'120元/天',area:'芙蓉广场地铁站附近',district:'芙蓉区',wechat:'Catbb0529',lng:112.989846,lat:28.193961},
+{id:119,title:'电视剧群演',salary:'80元/天+管饭管水',area:'贺龙体育馆旁/星沙地铁站/五一广场',district:'多区域',wechat:'Catbb0529',lng:112.979158,lat:28.198194},
+{id:120,title:'物料装袋',salary:'110元/天+包餐水',area:'贺龙体育馆',district:'天心区',wechat:'Lovoecat033',lng:112.976968,lat:28.178198},
+{id:121,title:'饿了么校园活动',salary:'120元/天',area:'湖南工商大学',district:'岳麓区',wechat:'CCTY699',lng:112.920138,lat:28.20894},
+{id:122,title:'开福区电商仓库长期',salary:'16元/h+0-3元绩效',area:'开福区',district:'开福区',wechat:'ccd66828',lng:112.984504,lat:28.257652},
+{id:123,title:'长沙火车站安检员',salary:'150元/班次周结',area:'长沙火车站',district:'芙蓉区',wechat:'ccd66828',lng:113.010539,lat:28.196754},
+{id:124,title:'图书馆',salary:'180元/天+包午饭',area:'黄兴广场/德思勤/湖南图书馆',district:'多区域',wechat:'lcllb33',lng:112.978663,lat:28.188655},
+{id:125,title:'5.23贺龙安保',salary:'有证外场140/内场120',area:'侯家塘贺龙体育场',district:'天心区',wechat:'V15211050779',lng:112.981187,lat:28.17597},
+{id:126,title:'玩偶扮演',salary:'170元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'yzdddi',lng:113.029884,lat:28.191042},
+{id:127,title:'妈妈驿站',salary:'20元/小时',area:'福元大桥西地铁口150米',district:'开福区',wechat:'fy122165',lng:112.920146,lat:28.239162},
+{id:128,title:'饮料促销员',salary:'100元/天',area:'星麓美式篮球中心',district:'多区域',wechat:'zqisme147',lng:112.980472,lat:28.180795},
+{id:129,title:'景区新媒体运营',salary:'120元/天周结',area:'橘子洲景区',district:'岳麓区',wechat:'Xia062206',lng:112.959548,lat:28.186181},
+{id:130,title:'望城京东',salary:'15元/小时',area:'望城京东亚洲一号物流园',district:'望城区',wechat:'ch10186437',lng:112.81757,lat:28.359175},
+{id:131,title:'黄花保税区电商',salary:'14元/小时+包两餐',area:'黄花保税区',district:'长沙县',wechat:'ch10186437',lng:113.148622,lat:28.231093},
+{id:132,title:'开福区菜鸟',salary:'16元/小时+包餐',area:'开福区深国际物流园',district:'开福区',wechat:'e15974298550',lng:112.982143,lat:28.255722},
+{id:133,title:'望城京东白晚班',salary:'15-19元/小时',area:'望城普洛斯物流园/望城京东亚洲一号物流园',district:'望城区',wechat:'15507390427',lng:112.817274,lat:28.35936},
+{id:134,title:'餐饮兼职服务员',salary:'15元/小时+包两餐',area:'多区域',district:'多区域',wechat:'c516930805',lng:112.97856,lat:28.180081},
+{id:135,title:'丰树御泥坊',salary:'16元/小时+包吃',area:'岳麓区丰树物流园一期拙燕仓',district:'岳麓区',wechat:'18163669468',lng:112.889252,lat:28.219356},
+{id:136,title:'中兴电子厂',salary:'20元/小时',area:'岳麓区麓谷电子厂',district:'岳麓区',wechat:'19973119390',lng:112.870968,lat:28.229923},
+{id:137,title:'梅溪湖步步高保安',salary:'日结90+20全勤',area:'岳麓区梅溪湖步步高超市',district:'岳麓区',wechat:'17752897663',lng:112.879877,lat:28.208989},
+{id:138,title:'金茂售楼处保安',salary:'日结140+20全勤',area:'岳麓区象鼻窝地铁站附近',district:'岳麓区',wechat:'17752892767',lng:112.875364,lat:28.21887},
+{id:139,title:'资料整理文员',salary:'150元/天',area:'岳麓区汽车西站西T1写字楼',district:'岳麓区',wechat:'Nikezxc0613',lng:112.93478,lat:28.21453},
+{id:140,title:'德思勤日结160',salary:'160元/天',area:'雨花区德思勤城市广场',district:'雨花区',wechat:'smj092527',lng:113.009748,lat:28.130347},
+{id:141,title:'瑞幸咖啡仓库',salary:'240-260元/天',area:'长沙庆星产业园（3号线广生地铁站附近）',district:'长沙县',wechat:'17674048697',lng:113.08209,lat:28.245807},
+{id:142,title:'麓谷嘉诺工厂',salary:'18元/小时',area:'岳麓区湖南尤艾科汽车',district:'岳麓区',wechat:'15507390427',lng:112.93253,lat:28.213381},
+{id:143,title:'瑞幸咖啡仓库分拣',salary:'240-260元/天',area:'长沙庆星产业园（3号线广生地铁站附近）',district:'长沙县',wechat:'17674048697',lng:113.082511,lat:28.246427},
+{id:144,title:'麓谷嘉诺工厂',salary:'18元/小时',area:'岳麓区湖南尤艾科汽车',district:'岳麓区',wechat:'15507390427',lng:112.93437,lat:28.213147},
+{id:145,title:'开福区白班日结',salary:'15元/小时+包吃工作餐',area:'开福区深国际物流园',district:'开福区',wechat:'x5z_9q',lng:112.983832,lat:28.256103},
+{id:146,title:'运动品牌打包',salary:'22元/小时',area:'多区域',district:'多区域',wechat:'gg260105',lng:112.979086,lat:28.18068},
+{id:147,title:'A10促销员',salary:'3500-5000元/月',area:'多区域',district:'多区域',wechat:'13786105661',lng:112.979494,lat:28.179659},
+{id:148,title:'儿童游乐园检票员',salary:'180元/天+包餐',area:'多区域',district:'多区域',wechat:'yzdddi',lng:112.980616,lat:28.179847},
+{id:149,title:'长沙县电商猫粮打包',salary:'15元/小时',area:'黄花机场附近跨境物流电商仓库',district:'长沙县',wechat:'ch10186437',lng:113.149866,lat:28.229991},
+{id:150,title:'望城普洛斯',salary:'15元/小时',area:'望城普洛斯物流园',district:'望城区',wechat:'ch10186437',lng:112.817084,lat:28.360404},
+{id:151,title:'雨花电商打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园',district:'雨花区',wechat:'chang07098818',lng:113.046493,lat:28.155068},
+{id:152,title:'外卖打包',salary:'180元/天+包餐',area:'开福区/芙蓉区',district:'多区域',wechat:'h81213_146',lng:112.979779,lat:28.178809},
+{id:153,title:'望城马桥河路远博云仓',salary:'打包15/装卸18/时',area:'望城区马桥河路远博云仓',district:'望城区',wechat:'17674048697',lng:112.8176,lat:28.360057},
+{id:154,title:'麓谷电子厂',salary:'16-17元/小时',area:'长沙麓谷企业广场A3栋',district:'岳麓区',wechat:'15507390427',lng:112.871021,lat:28.23149},
+{id:155,title:'柠季助推',salary:'140元',area:'国金中心',district:'芙蓉区',wechat:'K2401418815',lng:112.977516,lat:28.194547},
+{id:156,title:'丰树御泥坊',salary:'16元/小时+包吃',area:'岳麓区丰树物流园一期拙燕仓',district:'岳麓区',wechat:'18163669468',lng:112.889929,lat:28.220737},
+{id:157,title:'中兴电子厂',salary:'20元/小时',area:'岳麓区麓谷电子厂',district:'岳麓区',wechat:'19973119390',lng:112.870121,lat:28.230792},
+{id:158,title:'雨花区高桥桌游店',salary:'200元/天',area:'雨花区高桥',district:'雨花区',wechat:'17773186502',lng:113.03091,lat:28.171301},
+{id:159,title:'小酒馆服务员',salary:'180元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'lcllb33',lng:113.028999,lat:28.18873},
+{id:160,title:'星沙汽配厂周结',salary:'17.5-21.5元/时',area:'星沙（索恩格/博世）',district:'长沙县',wechat:'1149931216',lng:113.079743,lat:28.249629},
+{id:161,title:'德思勤日结160',salary:'160元/天',area:'雨花区德思勤城市广场',district:'雨花区',wechat:'smj092527',lng:113.010516,lat:28.130766},
+{id:162,title:'商场巡场',salary:'180元/天+包两餐',area:'多区域',district:'多区域',wechat:'17145903694',lng:112.980674,lat:28.179675},
+{id:163,title:'VR体验馆',salary:'160元/天+包餐水',area:'多区域',district:'多区域',wechat:'jzr224456',lng:112.979168,lat:28.181112},
+{id:164,title:'密室逃脱检票',salary:'160元/天+包餐',area:'岳麓万象城/五一广场/万家丽/德思勤/星沙吾悦',district:'多区域',wechat:'Fik17908495566',lng:112.97809,lat:28.196916},
+{id:165,title:'火车站安检员',salary:'150元/班次周结',area:'长沙火车站',district:'芙蓉区',wechat:'FUSus188',lng:113.008786,lat:28.197744},
+{id:166,title:'中联机械园普工',salary:'280-380元/天',area:'中联机械园',district:'多区域',wechat:'yhuaiyu6885',lng:112.979665,lat:28.178506},
+{id:167,title:'毕业季大学兼职',salary:'日结',area:'大学城',district:'岳麓区',wechat:'长沙职业圈',lng:112.930698,lat:28.181448},
+{id:168,title:'试喝促销员',salary:'120元/天',area:'多区域',district:'多区域',wechat:'长沙职业圈',lng:112.978755,lat:28.180674},
+{id:169,title:'周末活动助手',salary:'150元/天+包饭包水',area:'五一广场附近君悦酒店',district:'芙蓉区',wechat:'lh273056199',lng:112.977657,lat:28.197482},
+{id:170,title:'娃娃机补货',salary:'180元/天+包餐水',area:'万家丽国际购物广场/友阿百货/开福万达广场',district:'多区域',wechat:'nian0618nian',lng:112.96855,lat:28.200662},
+{id:171,title:'密室逃脱兼职',salary:'180元/天+包餐',area:'全长沙可就近安排',district:'多区域',wechat:'jianlai123nb',lng:112.980175,lat:28.178641},
+{id:172,title:'电影检票员',salary:'150元/天',area:'多区域',district:'多区域',wechat:'MM020066688',lng:112.981339,lat:28.178791},
+{id:173,title:'停车场秩序员',salary:'150元/天+包餐',area:'城铁生态动物园停车场',district:'天心区',wechat:'wangff016',lng:112.99005,lat:28.111286},
+{id:174,title:'零食很大零食店',salary:'220元/天',area:'雨花区/星沙/芙蓉/岳麓/长沙县',district:'多区域',wechat:'Bravesteadfast',lng:113.080026,lat:28.251142},
+{id:175,title:'开福区菜鸟白班',salary:'16元/小时+包餐',area:'开福区深国际物流园',district:'开福区',wechat:'lh273056199',lng:112.983446,lat:28.256153},
+{id:176,title:'零食打包',salary:'18元/小时',area:'雨花区/长沙县',district:'多区域',wechat:'18684939710',lng:113.07903,lat:28.24431},
+{id:177,title:'折纸皮',salary:'16元/小时',area:'雨花宝湾物流园',district:'雨花区',wechat:'wbzdq99',lng:113.080142,lat:28.13519},
+{id:178,title:'特产店协助',salary:'110元/天',area:'黄兴广场',district:'天心区',wechat:'wan17735341610',lng:112.981473,lat:28.188579},
+{id:179,title:'学生活动充场',salary:'餐补30元',area:'岳麓区靳江路学校附近',district:'岳麓区',wechat:'llllli66668',lng:112.934152,lat:28.212425},
+{id:180,title:'活动现场协助',salary:'130元/天',area:'五一广场',district:'芙蓉区',wechat:'YovoeH--0320',lng:112.978399,lat:28.199084},
+{id:181,title:'开福万达活动协助',salary:'160元/天',area:'开福万达广场',district:'开福区',wechat:'YT0101022',lng:112.969825,lat:28.201322},
+{id:182,title:'密室逃脱检票',salary:'160元/天',area:'岳麓万象城/五一广场/万家丽/德思勤/星沙吾悦',district:'多区域',wechat:'Tsy283222',lng:112.976573,lat:28.19789},
+{id:183,title:'中南大学助手',salary:'150元/天',area:'中南大学',district:'岳麓区',wechat:'a8851788',lng:112.931911,lat:28.21437},
+{id:184,title:'剧本杀NPC',salary:'170元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'lcllb33',lng:113.030942,lat:28.189911},
+{id:185,title:'长沙急招多岗位',salary:'12-20元/时或130-220元/天',area:'芙蓉/天心/岳麓/开福/雨花/长沙县',district:'多区域',wechat:'ax20251215',lng:113.081073,lat:28.244205},
+{id:186,title:'洋湖荟聚卡通尼打杂',salary:'160元/天+包吃',area:'岳麓区洋湖荟聚',district:'岳麓区',wechat:'RongLuckyovoy',lng:112.911493,lat:28.160938},
+{id:187,title:'书店打杂',salary:'130元/天',area:'五一广场',district:'芙蓉区',wechat:'benyy77',lng:112.978278,lat:28.197405},
+{id:188,title:'长沙多岗位日结',salary:'12-16元/小时或110-140元/天',area:'天心区/芙蓉区/岳麓区/雨花区/长沙县',district:'多区域',wechat:'e15974298550',lng:113.07998,lat:28.245023},
+{id:189,title:'望城京东白班',salary:'15元/小时',area:'京东物流亚洲一号物流园',district:'望城区',wechat:'chang07098818',lng:112.815258,lat:28.360483},
+{id:190,title:'活动助手',salary:'150元/天+包餐水',area:'黄兴广场附近',district:'天心区',wechat:'K2401418815',lng:112.979784,lat:28.188732},
+{id:191,title:'女兼职协助打杂',salary:'150元/天',area:'京东mall',district:'多区域',wechat:'syxx030407',lng:112.978969,lat:28.181144},
+{id:192,title:'品牌店秀场穿衣工',salary:'100-200元/天',area:'长沙IFS',district:'芙蓉区',wechat:'LIVE0011TT',lng:113.032151,lat:28.190564},
+{id:193,title:'24h图书馆兼职',salary:'120元/天+包午饭',area:'黄兴广场/德思勤/湖南图书馆',district:'多区域',wechat:'LovH_february13',lng:112.979944,lat:28.191423},
+{id:194,title:'会议现场协助',salary:'150元/天+包餐包水',area:'北辰三角洲',district:'开福区',wechat:'zzmnba0718',lng:112.969115,lat:28.219499},
+{id:195,title:'零食很大零食店',salary:'220元/天',area:'雨花区/星沙/芙蓉/岳麓/长沙县',district:'多区域',wechat:'19095676672',lng:113.079426,lat:28.250088},
+{id:196,title:'室内游戏辅助',salary:'180元/天',area:'万家丽/五一广场',district:'多区域',wechat:'lin18692278148',lng:112.977723,lat:28.198322},
+{id:197,title:'花店兼职',salary:'160元/天+包餐水',area:'黄兴广场/德思勤等',district:'多区域',wechat:'19095676672',lng:112.98046,lat:28.190903},
+{id:198,title:'酒店日结兼职',salary:'160元/天+包餐',area:'五一广场附近',district:'芙蓉区',wechat:'Tkh15173275864',lng:112.977196,lat:28.197377},
+{id:199,title:'长沙县长白班周结工',salary:'16-19元/小时',area:'长沙县创业乐园',district:'长沙县',wechat:'xl15674844174',lng:113.080489,lat:28.244623},
+{id:200,title:'电影院兼职',salary:'18元/小时',area:'万达影院',district:'多区域',wechat:'13874813326',lng:112.980402,lat:28.1787},
+{id:201,title:'5.20鲜花打包',salary:'130元/天',area:'全长沙市就近安排',district:'多区域',wechat:'16673277707',lng:112.978923,lat:28.181164},
+{id:202,title:'外卖骑手配送员',salary:'200-300元/天(日结)',area:'开福区德雅路口附近3公里',district:'开福区',wechat:'58同城',lng:112.984225,lat:28.255207},
+{id:203,title:'外卖骑手配送员',salary:'200-300元/天(日结)',area:'芙蓉/开福/岳麓多区域就近安排',district:'多区域',wechat:'58同城',lng:112.979794,lat:28.180367},
+{id:204,title:'人偶兼职(城市英雄大悦城)',salary:'140元/天',area:'北辰三角洲大悦城三楼',district:'开福区',wechat:'1323748****',lng:112.96924,lat:28.220133},
+{id:205,title:'电视台采访摄像',salary:'30元/小时',area:'长沙市各大公园/商场/游乐场',district:'多区域',wechat:'1862955****',lng:112.978819,lat:28.179723},
+{id:206,title:'分拣搬运工(白/中/晚班)',salary:'早班230/中班240/晚班240(12H)',area:'岳麓区金桥路与金南路交汇处',district:'岳麓区',wechat:'智联招聘',lng:112.932132,lat:28.214771},
+{id:207,title:'话务员',salary:'110底薪+提成(日结)',area:'开福区开福寺地铁站3号出口',district:'开福区',wechat:'长沙兼多多',lng:112.983259,lat:28.256087},
+{id:208,title:'装卸搭建兼职',salary:'300元/人',area:'芙蓉区解放西路/黄兴北路/建湘路',district:'芙蓉区',wechat:'长沙兼多多',lng:112.978323,lat:28.184951},
+{id:209,title:'盒马促销员',salary:'130元/天',area:'喜盈门',district:'多区域',wechat:'长沙兼多多',lng:112.980222,lat:28.180732},
+{id:210,title:'德思勤路演活动',salary:'180元/天',area:'雨花区德思勤一楼大厅',district:'雨花区',wechat:'长沙兼多多',lng:113.009142,lat:28.13149},
+{id:211,title:'外卖骑手配送员(雨花区)',salary:'39元/小时(日结)',area:'雨花区万家丽南路/曙光路就近安排',district:'雨花区',wechat:'58同城',lng:113.02953,lat:28.191427},
+{id:212,title:'世纪金源酒店服务生',salary:'12元/小时+包餐',area:'开福区马厂(1号线马厂站)',district:'开福区',wechat:'智联招聘',lng:112.949521,lat:28.260764},
+{id:213,title:'圣爵菲斯酒店服务生',salary:'12元/小时+包餐',area:'开福区月湖公园地铁站',district:'开福区',wechat:'智联招聘',lng:112.982359,lat:28.257468},
+{id:214,title:'超市配送(零食饮料)',salary:'350元/天(日结)',area:'雨花区凯德广场沃尔玛',district:'雨花区',wechat:'智联招聘',lng:113.018916,lat:28.148728},
+{id:215,title:'配送牛奶(生鲜会员店)',salary:'320元/天(日结)',area:'芙蓉区三湘汽车用品城',district:'芙蓉区',wechat:'前程无忧',lng:113.032285,lat:28.188597},
+{id:216,title:'晚班服务员',salary:'6000-8000元/月',area:'雨花区高铁南站长沙大道地铁站',district:'雨花区',wechat:'前程无忧',lng:113.070181,lat:28.149544},
+{id:217,title:'图文橱窗电商带货',salary:'130元/天(日结)',area:'长沙路捷物流',district:'多区域',wechat:'前程无忧',lng:112.980691,lat:28.180176},
+{id:218,title:'零食很忙理货',salary:'200-300元/天(日结)',area:'芙蓉区IFS国金中心',district:'芙蓉区',wechat:'BOSS直聘',lng:112.978389,lat:28.196942},
+{id:219,title:'电话客服专员',salary:'130-230元/天(日结)',area:'岳麓区天祥水晶湾',district:'岳麓区',wechat:'BOSS直聘',lng:112.932806,lat:28.21291},
+{id:220,title:'剧本杀桌游主持人',salary:'3000-7000元/月',area:'岳麓区湘腾城市广场',district:'岳麓区',wechat:'BOSS直聘',lng:112.9453,lat:28.219489},
+{id:221,title:'日结兼职+在家可做',salary:'30-50元/时',area:'雨花区',district:'雨花区',wechat:'智联招聘',lng:113.034246,lat:28.13838},
+{id:222,title:'暑期暑假工兼职(一天一结)',salary:'180-220元/天',area:'天心区城南路',district:'天心区',wechat:'BOSS直聘',lng:112.991327,lat:28.110744},
+{id:223,title:'奶茶店店员',salary:'4000-6000元/月',area:'芙蓉区东屯渡',district:'芙蓉区',wechat:'BOSS直聘',lng:113.038543,lat:28.199347},
+{id:224,title:'传单派发(开福)',salary:'120元/天(日结)',area:'开福区湘江世纪城',district:'开福区',wechat:'兼职猫',lng:112.964108,lat:28.275843},
+{id:225,title:'工艺品店人偶派发传单',salary:'140元/天(日结)',area:'雨花区',district:'雨花区',wechat:'兼职猫',lng:113.033942,lat:28.136646},
+{id:226,title:'人偶派单(岳麓)',salary:'130元/天(日结)',area:'岳麓区',district:'岳麓区',wechat:'兼职猫',lng:112.933132,lat:28.213207},
+{id:227,title:'人偶扮演发单(天心)',salary:'150元/天(日结)',area:'天心区',district:'天心区',wechat:'兼职猫',lng:112.989782,lat:28.110953},
+{id:228,title:'小件搬运工',salary:'300元/天(日结)',area:'芙蓉区马王堆市场',district:'芙蓉区',wechat:'兼职猫',lng:113.019111,lat:28.203712},
+{id:229,title:'会展安保',salary:'180元/天(日结)',area:'天心区侯家塘地铁站',district:'天心区',wechat:'兼职猫',lng:112.980904,lat:28.173724},
+{id:230,title:'传单派发(天心)',salary:'200元/天(日结)',area:'天心区',district:'天心区',wechat:'兼职猫',lng:112.989258,lat:28.111468},
+{id:231,title:'电影查票员',salary:'200元/天(日结)',area:'芙蓉区各区域就近安排',district:'芙蓉区',wechat:'兼职猫',lng:113.03266,lat:28.189442},
+{id:232,title:'电影查票员(天心)',salary:'200元/天(日结)',area:'天心区各区域就近安排',district:'天心区',wechat:'兼职猫',lng:112.989398,lat:28.108991},
+{id:233,title:'前台收银',salary:'130元/天(日结)',area:'芙蓉区',district:'芙蓉区',wechat:'兼职猫',lng:113.033288,lat:28.191007},
+{id:234,title:'物业促销员',salary:'200元/天(完工结)',area:'岳麓区',district:'岳麓区',wechat:'兼职猫',lng:112.934031,lat:28.214109},
+{id:235,title:'发传单员',salary:'25元/小时(日结)',area:'长沙各高中/地铁站旁就近安排',district:'多区域',wechat:'58同城',lng:112.980231,lat:28.179716},
+{id:236,title:'送水工人',salary:'400元/天(日结)',area:'芙蓉区识字岭',district:'芙蓉区',wechat:'鱼泡直聘',lng:112.993944,lat:28.186807},
+{id:237,title:'邮政分拣搬运',salary:'白班130/晚班170(日结)',area:'长沙县开元东路118号',district:'长沙县',wechat:'智联招聘',lng:113.080563,lat:28.243563},
+{id:238,title:'望城宝湾物流打包',salary:'160元/天(日结)',area:'望城区宝湾物流园2仓',district:'望城区',wechat:'智联招聘',lng:113.080373,lat:28.133805},
+{id:239,title:'线上客服(兼职可日结)',salary:'260元/天',area:'天心区',district:'天心区',wechat:'智联招聘',lng:112.989893,lat:28.110304},
+{id:240,title:'超市配送员(天心)',salary:'6000-9000元/月',area:'天心区赤岭路',district:'天心区',wechat:'58同城',lng:112.990589,lat:28.109989},
+{id:241,title:'装配工(雨花)',salary:'20-35元/时',area:'雨花区',district:'雨花区',wechat:'鱼泡直聘',lng:113.034176,lat:28.138378},
+{id:242,title:'仓管操作工(长白班)',salary:'320元/天',area:'芙蓉区五一大道',district:'芙蓉区',wechat:'鱼泡直聘',lng:113.032534,lat:28.189667},
+{id:243,title:'长白班装配工(长沙县)',salary:'10-20元/时',area:'长沙县',district:'长沙县',wechat:'鱼泡直聘',lng:113.078609,lat:28.243954},
+{id:244,title:'外卖骑手(通泰街)',salary:'39元/小时(日结)',area:'开福区通泰街/湘江中路',district:'开福区',wechat:'58同城',lng:112.9654,lat:28.209956},
+{id:245,title:'外卖骑手(多区域)',salary:'39元/小时(日结)',area:'天心/岳麓/开福/芙蓉多区域',district:'多区域',wechat:'58同城',lng:112.979586,lat:28.179606},
+{id:246,title:'大学生外卖骑手',salary:'220元/天(日结)',area:'雨花区粟塘小区',district:'雨花区',wechat:'智联招聘',lng:113.024214,lat:28.160102},
+{id:247,title:'茶颜悦色兼职',salary:'15-30元/时',area:'芙蓉区定王台',district:'芙蓉区',wechat:'BOSS直聘',lng:112.980347,lat:28.195501},
+{id:248,title:'海底捞钟点工',salary:'20-25元/时',area:'开福区湘江中路',district:'开福区',wechat:'BOSS直聘',lng:112.96461,lat:28.2107},
+{id:249,title:'兼职家教老师',salary:'60-300元/时',area:'长沙各区域可自选',district:'多区域',wechat:'BOSS直聘',lng:112.98068,lat:28.1801},
+{id:250,title:'民宿保洁',salary:'150-260元/天',area:'雨花/岳麓/天心/开福/望城',district:'多区域',wechat:'BOSS直聘',lng:112.816144,lat:28.360355},
+{id:251,title:'卢米埃影城兼职',salary:'20-25元/时',area:'岳麓区银盆岭',district:'岳麓区',wechat:'BOSS直聘',lng:112.951296,lat:28.21978},
+{id:252,title:'步步高促销员',salary:'20-25元/时',area:'岳麓区含浦/砂之船/洋湖荟聚等',district:'岳麓区',wechat:'BOSS直聘',lng:112.909989,lat:28.160893},
+{id:253,title:'小象超市分拣',salary:'15-20元/时',area:'岳麓区阳光100',district:'岳麓区',wechat:'BOSS直聘',lng:112.934394,lat:28.212001},
+{id:254,title:'盒马鲜生配送员',salary:'200-300元/天',area:'雨花区运达中央广场',district:'雨花区',wechat:'BOSS直聘',lng:113.060842,lat:28.143687},
+{id:255,title:'代驾司机',salary:'220-350元/天',area:'芙蓉区韭菜园',district:'芙蓉区',wechat:'BOSS直聘',lng:112.983983,lat:28.192019},
+{id:256,title:'麦德龙学生兼职',salary:'110-120元/天',area:'开福区四方坪',district:'开福区',wechat:'BOSS直聘',lng:113.010426,lat:28.230055},
+{id:257,title:'咖啡师兼职',salary:'20-25元/时',area:'芙蓉区韭菜园',district:'芙蓉区',wechat:'BOSS直聘',lng:112.985607,lat:28.190812},
+{id:258,title:'大学城暑假兼职',salary:'20-30元/时',area:'岳麓区河西大学城',district:'岳麓区',wechat:'BOSS直聘',lng:112.930246,lat:28.180715},
+{id:259,title:'兼职教师',salary:'120-150元/时',area:'芙蓉/雨花/岳麓区就近安排',district:'多区域',wechat:'BOSS直聘',lng:112.979254,lat:28.181004},
+{id:260,title:'ZARA店员',salary:'20-25元/时',area:'长沙各门店',district:'多区域',wechat:'BOSS直聘',lng:112.9804,lat:28.179452},
+{id:261,title:'迪卡侬销售助理',salary:'15-25元/时',area:'长沙各门店',district:'多区域',wechat:'BOSS直聘',lng:112.97888,lat:28.17987},
+{id:262,title:'线上兼职日结',salary:'70-150元/天',area:'开福区五一广场',district:'开福区',wechat:'BOSS直聘',lng:112.977977,lat:28.199457},
+{id:263,title:'遇南三火锅兼职',salary:'20-25元/时',area:'岳麓区望城坡',district:'岳麓区',wechat:'BOSS直聘',lng:112.878818,lat:28.200468},
+{id:264,title:'钟点工白班保姆',salary:'20-60元/时',area:'天心区金盆岭',district:'天心区',wechat:'BOSS直聘',lng:112.985274,lat:28.156249},
+{id:265,title:'小红书兼职运营',salary:'1000-2000元',area:'芙蓉区定王台',district:'芙蓉区',wechat:'智联招聘',lng:112.980429,lat:28.195341},
+{id:266,title:'线上客服日结',salary:'30-50元/时',area:'长沙',district:'多区域',wechat:'智联招聘',lng:112.97863,lat:28.179733}
+    ];
+
+    // 当前筛选区域
+    let currentFilter = '全部';
+    let map = null;
+    let markers = [];
+
+    // 计算两点距离（公里）
+    function getDistance(lng1, lat1, lng2, lat2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // 显示错误信息
+    function showError(message) {
+      document.getElementById('loading').style.display = 'none';
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-msg';
+      errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <h3>地图加载失败</h3>
+        <p>${message}</p>
+        <button onclick="location.reload()">重新加载</button>
+      `;
+      document.body.appendChild(errorDiv);
+    }
+
+    // 清除所有标记
+    function clearMarkers() {
+      markers.forEach(function(marker) {
+        marker.setMap(null);
+      });
+      markers = [];
+    }
+
+    // 添加兼职标记
+    function addJobMarkers(filterDistrict) {
+      clearMarkers();
+
+      let nearbyCount = 0;
+      let filteredJobs = jobsData;
+
+      if (filterDistrict && filterDistrict !== '全部') {
+        filteredJobs = jobsData.filter(function(job) {
+          return job.district === filterDistrict;
+        });
+      }
+
+      filteredJobs.forEach(function(job) {
+        // 使用精确坐标
+        const position = [job.lng, job.lat];
+
+        // 计算距离
+        const distance = getDistance(CENTER_POSITION[0], CENTER_POSITION[1], position[0], position[1]);
+        if (distance <= 3) nearbyCount++;
+
+        const marker = new AMap.Marker({
+          position: position,
+          title: job.title,
+          icon: new AMap.Icon({
+            size: new AMap.Size(24, 24),
+            image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
+            imageSize: new AMap.Size(24, 24)
+          }),
+          offset: new AMap.Pixel(-12, -24)
+        });
+
+        // 信息窗内容
+        const infoContent = '<div class="info-window">' +
+          '<h3>' + job.title + '</h3>' +
+          '<div class="salary">' + job.salary + '</div>' +
+          '<span class="district">' + job.district + '</span>' +
+          '<div class="address"><i class="fas fa-map-marker-alt"></i> ' + job.area + '</div>' +
+          '<div class="wechat"><i class="fab fa-weixin"></i> ' + job.wechat + '</div>' +
+          '<button class="btn-copy" onclick="copyWechat(\'' + job.wechat + '\')">复制微信</button>' +
+        '</div>';
+
+        const infoWindow = new AMap.InfoWindow({
+          content: infoContent,
+          offset: new AMap.Pixel(0, -24)
+        });
+
+        marker.on('click', function() {
+          infoWindow.open(map, marker.getPosition());
+        });
+        marker.setMap(map);
+        markers.push(marker);
+      });
+
+      // 更新统计
+      document.getElementById('nearby-jobs').textContent = nearbyCount;
+      document.getElementById('total-jobs').textContent = filteredJobs.length;
+    }
+
+    // 初始化地图
+    function initMap() {
+      try {
+        // 检查高德地图是否加载成功
+        if (typeof AMap === 'undefined') {
+          showError('高德地图 API 加载失败，请检查网络连接');
+          return;
+        }
+
+        // 创建地图
+        map = new AMap.Map('map-container', {
+          center: CENTER_POSITION,
+          zoom: 12,
+          viewMode: '2D'
+        });
+
+        // 添加中心点标记（家）- 使用红色圆点
+        const homeMarker = new AMap.Marker({
+          position: CENTER_POSITION,
+          title: '您的位置：润和国际广场',
+          icon: new AMap.Icon({
+            size: new AMap.Size(32, 32),
+            image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',
+            imageSize: new AMap.Size(32, 32)
+          }),
+          offset: new AMap.Pixel(-16, -32)
+        });
+        homeMarker.setMap(map);
+
+        // 添加中心点信息窗
+        const homeInfo = new AMap.InfoWindow({
+          content: '<div style="padding:10px;font-size:13px;"><b>🏠 您的位置</b><br>润和国际广场<br>开福区福元西路96号</div>',
+          offset: new AMap.Pixel(0, -32)
+        });
+        homeMarker.on('click', function() {
+          homeInfo.open(map, homeMarker.getPosition());
+        });
+
+        // 添加圆圈表示3公里范围
+        const circle = new AMap.Circle({
+          center: CENTER_POSITION,
+          radius: 3000,
+          strokeColor: '#667eea',
+          strokeOpacity: 0.5,
+          strokeWeight: 2,
+          fillColor: '#667eea',
+          fillOpacity: 0.1
+        });
+        circle.setMap(map);
+
+        // 添加兼职标记
+        addJobMarkers('全部');
+
+        // 隐藏加载
+        document.getElementById('loading').style.display = 'none';
+
+        // 绑定筛选按钮事件
+        document.querySelectorAll('.filter-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(function(b) {
+              b.classList.remove('active');
+            });
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-district');
+            addJobMarkers(currentFilter);
+          });
+        });
+
+      } catch (error) {
+        console.error('地图初始化错误:', error);
+        showError('地图初始化失败: ' + error.message);
+      }
+    }
+
+    // 复制微信
+    function copyWechat(wechat) {
+      if (wechat === '未提供' || wechat.includes('*')) {
+        alert('该岗位未提供完整微信，请查看详情');
+        return;
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(wechat).then(function() {
+          alert('已复制微信：' + wechat);
+        });
+      } else {
+        const input = document.createElement('input');
+        input.value = wechat;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        alert('已复制微信：' + wechat);
+      }
+    }
+
+    // 页面加载完成后初始化地图
+    window.onload = function() {
+      // 延迟加载确保高德地图脚本已加载
+      setTimeout(function() {
+        initMap();
+      }, 1000);
+    };
+  </script>
+</body>
+</html>
