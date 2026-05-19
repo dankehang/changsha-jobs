@@ -102,7 +102,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
 <div class="container">
 <div class="header">
 <h1>长沙兼职信息汇总</h1>
-<div class="subtitle">参考点：润和国际广场（开福区福元西路96号，地铁1号线马厂站）</div>
+<div class="subtitle">参考点：万科城B区36栋（开福区马厂，地铁1号线马厂站）</div>
 <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
 <a href="map.html" style="background:rgba(255,255,255,0.2);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
 <i class="fas fa-map-marked-alt"></i> 🗺️ 地图模式
@@ -146,15 +146,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
 <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
-// 区域距离/通勤配置
+// 区域距离/通勤配置 - 以万科城B区36栋（马厂地铁站附近）为参考点
 var areaConfig = {
-  '开福区': {distMin:1,distMax:5,commuteMin:10,commuteMax:20},
-  '芙蓉区': {distMin:5,distMax:10,commuteMin:15,commuteMax:25},
-  '天心区': {distMin:6,distMax:12,commuteMin:20,commuteMax:35},
-  '雨花区': {distMin:8,distMax:15,commuteMin:30,commuteMax:50},
-  '岳麓区': {distMin:8,distMax:18,commuteMin:25,commuteMax:40},
-  '望城区': {distMin:15,distMax:30,commuteMin:50,commuteMax:70},
-  '长沙县': {distMin:15,distMax:35,commuteMin:40,commuteMax:60},
+  '开福区': {distMin:1,distMax:4,commuteMin:8,commuteMax:15},
+  '芙蓉区': {distMin:3,distMax:8,commuteMin:12,commuteMax:25},
+  '天心区': {distMin:8,distMax:15,commuteMin:25,commuteMax:40},
+  '雨花区': {distMin:10,distMax:18,commuteMin:30,commuteMax:50},
+  '岳麓区': {distMin:12,distMax:20,commuteMin:35,commuteMax:55},
+  '望城区': {distMin:8,distMax:18,commuteMin:25,commuteMax:45},
+  '长沙县': {distMin:10,distMax:20,commuteMin:30,commuteMax:50},
   '多区域': {distMin:5,distMax:15,commuteMin:20,commuteMax:40},
   '线上': {distMin:0,distMax:0,commuteMin:0,commuteMax:0}
 };
