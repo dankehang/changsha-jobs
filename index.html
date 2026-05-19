@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>长沙兼职信息汇总</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333;line-height:1.5}
+.container{max-width:800px;margin:0 auto;padding:12px}
+
+/* 头部 */
+.header{background:linear-gradient(135deg,#1a73e8 0%,#4285f4 100%);color:#fff;border-radius:12px;padding:20px;margin-bottom:12px}
+.header h1{font-size:20px;font-weight:600;margin-bottom:6px}
+.header .subtitle{font-size:12px;opacity:0.9}
+
+/* 防骗提醒 */
+.scam-warning{background:#fff8e1;border-left:4px solid #ff9800;padding:12px 14px;border-radius:0 8px 8px 0;font-size:13px;color:#e65100;margin-bottom:12px;line-height:1.7}
+.scam-warning strong{color:#bf360c}
+
+/* 筛选区 */
+.filters{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.filters .label{font-size:13px;color:#666;margin-bottom:10px;font-weight:500}
+.filter-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.filter-tags button{padding:6px 14px;border:1px solid #e0e0e0;border-radius:20px;background:#fff;font-size:13px;color:#555;cursor:pointer;transition:all .2s}
+.filter-tags button:hover{border-color:#1976d2;color:#1976d2}
+.filter-tags button.active{background:#1976d2;color:#fff;border-color:#1976d2}
+.sort-bar{display:flex;align-items:center;gap:8px;font-size:13px;color:#666;flex-wrap:wrap}
+.sort-bar select{padding:5px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;color:#333;background:#fff;cursor:pointer}
+.stats{font-size:13px;color:#999;margin-left:auto}
+
+/* 岗位列表 */
+.job-list{display:flex;flex-direction:column;gap:12px;padding-bottom:20px}
+
+/* 岗位卡片 - 重新设计 */
+.job-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .2s}
+.job-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.1)}
+
+/* 卡片头部：标题+薪资 */
+.card-header{padding:14px 14px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-bottom:1px solid #f5f5f5}
+.card-header .title{font-size:16px;font-weight:600;color:#1a1a1a;flex:1}
+.card-header .salary{font-size:18px;font-weight:700;color:#e53935;white-space:nowrap;text-align:right}
+.card-header .salary small{font-size:12px;font-weight:400;color:#999}
+
+/* 来源标签行 */
+.card-source{padding:8px 14px;background:#fafafa;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.source-tag{display:inline-block;font-size:11px;color:#1565c0;background:#e3f2fd;padding:3px 10px;border-radius:12px;font-weight:500}
+
+/* 班次/工时标签 */
+.shift-tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-right:4px}
+.shift-day{background:#e8f5e9;color:#2e7d32}
+.shift-night{background:#e3f2fd;color:#1565c0}
+.shift-mid{background:#fff3e0;color:#e65100}
+.shift-allday{background:#f3e5f5;color:#7b1fa2}
+.shift-unknown{background:#f5f5f5;color:#999}
+
+/* 信息行 */
+.card-info{padding:12px 14px}
+.info-row{display:flex;align-items:flex-start;margin-bottom:8px;font-size:13px}
+.info-row:last-child{margin-bottom:0}
+.info-row .icon{width:20px;color:#888;flex-shrink:0;margin-top:1px}
+.info-row .label{color:#888;width:50px;flex-shrink:0}
+.info-row .value{color:#333;flex:1}
+.info-row .value.highlight{color:#1976d2;font-weight:500}
+
+/* 要求行 */
+.requirements-row{background:#fff8e1;padding:10px 14px;font-size:12px;color:#856404;line-height:1.6}
+.requirements-row .icon{color:#ff9800}
+.requirements-row .req-tag{display:inline-block;background:#fff;padding:2px 8px;border-radius:8px;margin:2px 4px 2px 0;font-size:11px;color:#5d4037;border:1px solid #ffe0b2}
+.requirements-row .req-extra{color:#c62828;font-weight:500}
+
+/* 底部操作栏 */
+.card-footer{padding:10px 14px;border-top:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;background:#fafafa}
+.distance-info{font-size:12px;color:#888}
+.distance-info span{margin-right:12px}
+.distance-info strong{color:#333}
+
+/* 操作按钮 */
+.actions{display:flex;gap:8px}
+.actions button{padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:none;transition:all .2s;font-weight:500}
+.actions button:hover{transform:translateY(-1px)}
+.btn-wechat{background:#07c160;color:#fff}
+.btn-wechat:hover{background:#06ad56}
+.btn-map{background:#e3f2fd;color:#1565c0}
+.btn-map:hover{background:#bbdefb}
+.btn-copy{background:#e8f5e9;color:#2e7d32}
+.btn-copy.copied{background:#2e7d32;color:#fff}
+
+/* 微信号显示 */
+.wechat-display{display:inline-flex;align-items:center;gap:4px;background:#f5f5f5;padding:2px 8px;border-radius:6px;font-family:monospace;font-size:13px;color:#333}
+
+/* 空状态 */
+.empty-state{text-align:center;padding:40px 20px;color:#999;font-size:14px}
+
+/* 回到顶部 */
+.back-to-top{position:fixed;bottom:20px;right:20px;width:44px;height:44px;border-radius:50%;background:#1976d2;color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2);display:none;align-items:center;justify-content:center;z-index:99}
+.back-to-top.show{display:flex}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>长沙兼职信息汇总</h1>
+<div class="subtitle">参考点：润和国际广场（开福区福元西路96号，地铁1号线马厂站）</div>
+<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+<a href="map.html" style="background:rgba(255,255,255,0.2);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+<i class="fas fa-map-marked-alt"></i> 🗺️ 地图模式
+</a>
+</div>
+</div>
+
+<div class="scam-warning">
+<strong>⚠️ 防骗提醒：</strong>凡是要求先交押金/培训费/服装费的，99%是骗子！不要提前转账，保护个人隐私，建议实地考察后再决定。
+</div>
+
+<div class="filters">
+<div class="label">📍 按区域筛选</div>
+<div class="filter-tags" id="areaFilters">
+<button class="active" data-area="all">全部</button>
+<button data-area="开福区">开福区</button>
+<button data-area="天心区">天心区</button>
+<button data-area="雨花区">雨花区</button>
+<button data-area="岳麓区">岳麓区</button>
+<button data-area="芙蓉区">芙蓉区</button>
+<button data-area="望城区">望城区</button>
+<button data-area="长沙县">长沙县</button>
+<button data-area="多区域">多区域</button>
+</div>
+<div class="sort-bar">
+<span>排序：</span>
+<select id="sortSelect">
+<option value="default">默认</option>
+<option value="distance">距离最近</option>
+<option value="commute">通勤最短</option>
+<option value="salary">薪资最高</option>
+<option value="date">最新发布</option>
+</select>
+<span class="stats" id="statsText">共 0 条</span>
+</div>
+</div>
+
+<div class="job-list" id="jobList"></div>
+</div>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// 区域距离/通勤配置
+var areaConfig = {
+  '开福区': {distMin:1,distMax:5,commuteMin:10,commuteMax:20},
+  '芙蓉区': {distMin:5,distMax:10,commuteMin:15,commuteMax:25},
+  '天心区': {distMin:6,distMax:12,commuteMin:20,commuteMax:35},
+  '雨花区': {distMin:8,distMax:15,commuteMin:30,commuteMax:50},
+  '岳麓区': {distMin:8,distMax:18,commuteMin:25,commuteMax:40},
+  '望城区': {distMin:15,distMax:30,commuteMin:50,commuteMax:70},
+  '长沙县': {distMin:15,distMax:35,commuteMin:40,commuteMax:60},
+  '多区域': {distMin:5,distMax:15,commuteMin:20,commuteMax:40},
+  '线上': {distMin:0,distMax:0,commuteMin:0,commuteMax:0}
+};
+
+// 解析薪资为数值（用于排序）
+function parseSalary(s) {
+  if (!s) return 0;
+  s = s.replace(/,/g,'');
+  var m;
+  m = s.match(/(\d+)-?(\d*)元\/月/);
+  if (m) { var v = parseInt(m[1]); if (m[2]) v = (v + parseInt(m[2])) / 2; return v / 22; }
+  m = s.match(/(\d+)-?(\d*)元\/天/);
+  if (m) { var v = parseInt(m[1]); if (m[2]) v = (v + parseInt(m[2])) / 2; return v; }
+  m = s.match(/(\d+)-?(\d*)元\/(小时|时)/);
+  if (m) { var v = parseInt(m[1]); if (m[2]) v = (v + parseInt(m[2])) / 2; return v * 8; }
+  m = s.match(/(\d+)元\/班次/);
+  if (m) return parseInt(m[1]);
+  m = s.match(/(\d+)元\/场/);
+  if (m) return parseInt(m[1]);
+  m = s.match(/(\d+)元\/次/);
+  if (m) return parseInt(m[1]);
+  m = s.match(/(\d+)元/);
+  if (m) return parseInt(m[1]);
+  m = s.match(/综合(\d+)-?(\d*)/);
+  if (m) { var v = parseInt(m[1]); if (m[2]) v = (v + parseInt(m[2])) / 2; return v / 22; }
+  return 0;
+}
+
+// 岗位数据 - 包含要求信息
+var rawData = [
+// === 长沙佛系打工人 ===
+{id:1,title:'零食店理货员',salary:'120元/天',area:'芙蓉广场地铁站附近',district:'芙蓉区',wechat:'Catbb0529',requirements:'17-42岁，男女不限，无染发纹身外露',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:2,title:'餐饮店服务生',salary:'120元/天+包3餐',area:'万家丽/洋湖湿地/梅溪湖/五一广场等',district:'多区域',wechat:'Catbb0529',requirements:'17-45岁，穿长裤，传菜服务',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:3,title:'电视剧拍摄群演',salary:'80元/天+管饭管水',area:'贺龙体育馆/星沙地铁站/五一广场',district:'多区域',wechat:'Catbb0529',requirements:'18-35岁，头发无明显亮色，无美甲',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:4,title:'零食很忙/零食王国',salary:'130-150元/天',area:'雨花区超级零食很忙/芙蓉广场零食王国',district:'雨花区/芙蓉区',wechat:'sleepyhead997',requirements:'男女不限，摆货理货搬零食',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:5,title:'特产打包补货',salary:'100-180元/天',area:'黄兴广场/五一广场',district:'天心区',wechat:'sleepyhead997',requirements:'男女不限，协助打包特产补货整理礼盒',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:6,title:'鬼屋/剧本杀NPC',salary:'220元/天',area:'全长沙多门店',district:'多区域',wechat:'未提供',requirements:'18-38岁，性格开放，最少连续做五天',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:7,title:'物料装袋',salary:'110元/天+包餐水',area:'贺龙体育馆',district:'天心区',wechat:'Lovoecat033',requirements:'手脚麻利，干活勤快，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:8,title:'化妆品包装',salary:'白班16-18/h晚班17-20/h',area:'岳麓区丰树物流园2期/宇培物流园',district:'岳麓区',wechat:'sleepyhead997',requirements:'18-50岁，男女不限，包两餐',hours:'',shift:'白班/晚班',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:9,title:'24h图书馆',salary:'160-200元/天+包午饭',area:'黄兴广场/德思勤/湖南图书馆',district:'多区域',wechat:'19375173727',requirements:'18-45岁，男女不限，整理书籍搬运图书',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:10,title:'零食很大',salary:'220元/天',area:'雨花区/星沙/芙蓉区/岳麓区',district:'多区域',wechat:'Yunyun525888',requirements:'男女不限，搬货物整理货架',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:11,title:'兼职服务员',salary:'120元/天+包3餐',area:'开福万达/梅溪湖金茂/五一广场国金等',district:'多区域',wechat:'sleepyhead997',requirements:'16-45岁，有责任心，能吃苦耐劳',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:12,title:'侯家塘贺龙安保',salary:'有证外场140/内场120',area:'侯家塘贺龙附近',district:'天心区',wechat:'li17873991112',requirements:'满18岁，170+身高，短发无染发无纹身',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:13,title:'雨花区超市坐班',salary:'130元/天+包餐水',area:'雨花区超市',district:'雨花区',wechat:'W-2025-10-1',requirements:'满18岁，男女不限，叠衣服贴标',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:14,title:'长沙县协助',salary:'130元/天+包餐包水',area:'长沙县',district:'长沙县',wechat:'BINAO66666666',requirements:'男女不限，布置现场整理物料',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:15,title:'电影院检票员',salary:'180元/天+包餐',area:'五一广场附近',district:'芙蓉区',wechat:'Bravesteadfast',requirements:'有责任心，检票验券引导顾客',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:16,title:'玩偶扮演',salary:'170元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'ZHX2069875387',requirements:'有责任心，不能偷懒',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:17,title:'饿了么校园活动',salary:'120元/天',area:'湖南工商大学',district:'岳麓区',wechat:'CCTY699',requirements:'认真负责，2女1男，外向开朗',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:18,title:'火车站女安检员',salary:'150元/班次周结',area:'长沙火车站',district:'芙蓉区',wechat:'ccd66828',requirements:'女性18-40岁，身高1.5米以上，包住',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:19,title:'路演日结',salary:'80元/场',area:'保利天禧',district:'岳麓区',wechat:'wan17735341610',requirements:'现场配合拍摄，暖场',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:20,title:'开福区游乐园巡场',salary:'面议',area:'开福区',district:'开福区',wechat:'syxx030407',requirements:'限男，巡场维护秩序',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:21,title:'雨花电商打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园',district:'雨花区',wechat:'chang07098818',requirements:'18-50岁，男女不限',hours:'',shift:'白班/晚班',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:22,title:'星沙汽配厂周结',salary:'17.5-21.5元/时',area:'星沙',district:'长沙县',wechat:'18932416326',requirements:'男20-40岁/女18-40岁，无需体检，包住包餐',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:23,title:'中联重科普工/叉车工',salary:'20-22元/时',area:'岳麓区谢家桥地铁站附近',district:'岳麓区',wechat:'yhuaiyu6885',requirements:'普工男18-46岁，叉车工需证，包住',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:24,title:'花店打杂',salary:'18元/小时+包吃',area:'多区域',district:'多区域',wechat:'nian0618nian',requirements:'手脚麻利，会看事做事',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:25,title:'花店打包',salary:'10元/小时+包餐',area:'涉外经济学院附近',district:'岳麓区',wechat:'XQZ512-23M',requirements:'18-35岁，男女不限，必须连做',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:26,title:'5.23贺龙安保',salary:'有证外场140/内场120',area:'侯家塘贺龙体育场',district:'天心区',wechat:'15211050779',requirements:'男170+女160+，18-45岁，短发无烫染',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:27,title:'会议引导',salary:'150元/天',area:'开福区万达广场附近',district:'开福区',wechat:'VYJKL888',requirements:'男女不限，接待引导读者排队维持秩序',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:28,title:'周末活动助手',salary:'150元/天+包饭包水',area:'五一广场附近君悦酒店',district:'芙蓉区',wechat:'wanshishunsui_zhao',requirements:'男女不限，8人，布置现场打杂搞卫生',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:29,title:'教培发传单',salary:'半天40元/一天80元+提成',area:'德思勤',district:'雨花区',wechat:'Xia071704',requirements:'20岁以上女生，有地推经验',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:30,title:'中餐厅服务生',salary:'220元/天+包餐',area:'多区域',district:'多区域',wechat:'ttgg_laiiy1223',requirements:'17-48岁，3人',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:31,title:'餐饮兼职服务员',salary:'15元/小时+包两餐',area:'多区域',district:'多区域',wechat:'c516930805',requirements:'18岁以上男性，必须有经验，无美甲纹身染发',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:32,title:'杀虫帮忙',salary:'140元/天+包水',area:'多区域',district:'多区域',wechat:'wbzdq99',requirements:'做事靠谱，不能穿短裤拖鞋',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:33,title:'新氧医美体验',salary:'15元+洗脸护肤体验',area:'新氧长沙世贸店/德思勤店/北辰店',district:'多区域',wechat:'fy122165',requirements:'需要10个人',hours:'10个/天',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:34,title:'望城远博云仓',salary:'15元/小时',area:'望城远博云仓',district:'望城区',wechat:'MM020066688',requirements:'16-50岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:35,title:'电商仓库猫粮打包',salary:'16元/小时',area:'多区域',district:'多区域',wechat:'L198426730',requirements:'18-50岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:36,title:'妈妈驿站临时工',salary:'20元/小时',area:'福元大桥西地铁口150米',district:'开福区',wechat:'lh273056199',requirements:'做事认真，周末两天必须连做',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:37,title:'文艺活动现场助理',salary:'180元/天+包餐水',area:'多区域',district:'多区域',wechat:'MM020066688',requirements:'守时靠谱，认真负责',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:38,title:'景区新媒体运营',salary:'120元/天周结',area:'橘子洲景区',district:'岳麓区',wechat:'Xia062206',requirements:'会小红书等平台推广文案，会剪辑拍摄优先',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:39,title:'岳麓宇培御泥坊',salary:'15元/小时+包中餐',area:'长沙宇培物流园w2仓',district:'岳麓区',wechat:'ch10186437',requirements:'16-40岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:40,title:'望城普洛斯',salary:'15元/小时',area:'望城普洛斯物流园',district:'望城区',wechat:'ch10186437',requirements:'18-50岁，男女不限，可乐打包',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:41,title:'星沙邮政分拣',salary:'160元/天',area:'星沙',district:'长沙县',wechat:'a2545969810',requirements:'22-50岁，男生',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:42,title:'长沙县零食打包',salary:'18元/小时',area:'夸特纳斯长沙智慧冷链产业园',district:'长沙县',wechat:'17674048697',requirements:'18-45岁，男女不限，最少做到6.20，包住',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:43,title:'望城马桥河路远博云仓',salary:'打包15/时装卸18/时',area:'望城马桥河路远博云仓',district:'望城区',wechat:'15507390427',requirements:'男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:44,title:'丰树御泥坊',salary:'16元/小时+包中晚2餐',area:'岳麓区丰树物流园一期拙燕仓',district:'岳麓区',wechat:'18163669468',requirements:'16-45岁，女生，做到6月20日',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:45,title:'麓谷电子厂',salary:'20元/小时',area:'岳麓区麓谷电子厂',district:'岳麓区',wechat:'19973119390',requirements:'18-39岁，男女不限，无案底无明显纹身，包住',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:46,title:'英雄联盟游戏兼职',salary:'30元',area:'雅雀湖附近/扬帆小区附近',district:'多区域',wechat:'LIVE0011TT',requirements:'19-35岁，需自己有QQ账号',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:47,title:'金茂售楼处保安',salary:'日结140+20全勤',area:'岳麓区象鼻窝地铁站附近',district:'岳麓区',wechat:'17752892767',requirements:'男18-30岁，身高178以上，无案底无明显纹身，包吃包住',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:48,title:'短视频群演',salary:'160元/次',area:'天心区五一广场附近',district:'天心区',wechat:'QHGZS2022',requirements:'18-35岁，形象整洁，不怯镜头',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:49,title:'芙蓉广场零食店长期',salary:'160元/天+包中晚餐',area:'芙蓉广场零食店',district:'芙蓉区',wechat:'wenwen_5890',requirements:'18-45岁，男女不限，一个月起做',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:50,title:'望城比亚迪',salary:'综合5500-6500元/月',area:'望城比亚迪',district:'望城区',wechat:'wenwen_5890',requirements:'18-47岁，男女不限，五险一金，包住',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+{id:51,title:'小区保安短期',salary:'120元/天+包吃包住',area:'岳麓区/开福区/天心区/长沙县等',district:'多区域',wechat:'tmumul888',requirements:'17-45岁，男女不限，无犯罪记录',hours:'',shift:'',date:'2026-05-15',sources:['长沙佛系打工人']},
+
+// === 长沙职业圈 ===
+{id:52,title:'娃娃机补货',salary:'180元/天+包餐水',area:'万家丽国际购物广场/友阿百货/开福万达广场',district:'多区域',wechat:'Bravesteadfast',requirements:'18-55岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:53,title:'周末活动助手',salary:'150元/天+包饭包水',area:'五一广场附近君悦酒店',district:'芙蓉区',wechat:'wanshishunsui_zhao',requirements:'男女不限，6人，布置现场打杂搞卫生',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:54,title:'火车站女安检员',salary:'150元/班次周结',area:'长沙火车站',district:'芙蓉区',wechat:'ccd66828',requirements:'女性18-40岁，身高1.5米以上，包住',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:55,title:'排队充场',salary:'150元',area:'五一广场国金街',district:'芙蓉区',wechat:'MM020066688',requirements:'5人',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:56,title:'电影检票员',salary:'150元/天',area:'多区域',district:'多区域',wechat:'wan17735341610',requirements:'男女不限，有无经验均可',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:57,title:'雨花区物流分拣',salary:'150-165元/天',area:'雨花区申通附近',district:'雨花区',wechat:'18684939710',requirements:'16-55岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:58,title:'长沙县小件扫描',salary:'分拣160/装卸180/天',area:'大地国际',district:'长沙县',wechat:'chang07098818',requirements:'20-50岁，男女不限，必须有快递经验',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:59,title:'书店打杂',salary:'130元',area:'五一广场',district:'芙蓉区',wechat:'lh273056199',requirements:'45岁以下，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:60,title:'杀虫帮忙',salary:'140元+包水',area:'多区域',district:'多区域',wechat:'wbzdq99',requirements:'做事靠谱，不能穿短裤拖鞋',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:61,title:'雨花万纬水果榴莲',salary:'18元/时',area:'雨花区万纬',district:'雨花区',wechat:'nian0618nian',requirements:'20-48岁男性，包住',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:62,title:'地推兼职',salary:'150元+表现奖',area:'恰同学少年广场',district:'多区域',wechat:'h81213_146',requirements:'18岁以上，性格外向，有地推经验优先',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:63,title:'电竞赛事执行',salary:'150元/场',area:'岳麓区梅溪湖电竞文化中心',district:'岳麓区',wechat:'lh273056199',requirements:'18-28岁，懂英雄联盟/无畏契约优先',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:64,title:'小酒馆服务员',salary:'180元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'lcllb33',requirements:'工作认真，不偷懒',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:65,title:'新氧医美体验',salary:'15元+洗脸护肤体验',area:'新氧长沙世贸店/德思勤店/北辰店',district:'多区域',wechat:'fy122165',requirements:'需要10个人',hours:'10个/天',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:66,title:'花店帮忙',salary:'140元/天',area:'芙蓉区浏城桥花店',district:'芙蓉区',wechat:'15674983662',requirements:'20-35岁，不怕刺，有电动车优先',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:67,title:'密室逃脱NPC',salary:'220元/天',area:'岳麓区/开福区/天心区/芙蓉区',district:'多区域',wechat:'Tsy283222',requirements:'满18岁，能干活，10个男性',hours:'10个/天',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:68,title:'长沙急招多岗位',salary:'12-20元/时或130-220元/天',area:'芙蓉/天心/岳麓/开福/雨花/长沙县',district:'多区域',wechat:'ax20251215',requirements:'18-50岁，男女不限，安保/安检/传单派发/活动协助/酒店服务员',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:69,title:'开福区菜鸟日结',salary:'16元/小时+包餐',area:'开福区深国际物流园',district:'开福区',wechat:'e15974298550',requirements:'18-50岁，男女不限，打包奶茶类零食',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:70,title:'线上普通话录制',salary:'30元',area:'线上',district:'线上',wechat:'llllli66668',requirements:'18岁以上，分得清nl',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:71,title:'五一广场国金附近保安',salary:'10元/小时+10车补',area:'五一广场5号地铁口集合',district:'芙蓉区',wechat:'syxx030407',requirements:'身高173+，短发无染发无纹身',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:72,title:'柠季助推',salary:'140元+车补10',area:'国金',district:'芙蓉区',wechat:'K2401418815',requirements:'听从安排，干净整洁，不社恐',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:73,title:'花店兼职',salary:'160元/天+包餐水',area:'黄兴广场/德思勤等',district:'多区域',wechat:'19095676672',requirements:'18-45岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+{id:74,title:'零食很大',salary:'220元/天',area:'雨花区/星沙/芙蓉区/岳麓区/长沙县',district:'多区域',wechat:'19095676672',requirements:'男女不限，搬货物整理货架',hours:'',shift:'',date:'2026-05-15',sources:['长沙职业圈']},
+
+// === 长沙易职 ===
+{id:75,title:'雨花区宝湾物流电商',salary:'退货19/时打包17-19/时',area:'雨花区宝湾物流园（长沙高铁南站附近）',district:'雨花区',wechat:'17508553638',requirements:'退货处理员38岁以下/打包员18-48岁',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:76,title:'雨花区超市坐班',salary:'140元/天+包餐水',area:'雨花区超市',district:'雨花区',wechat:'W-2025-10-1',requirements:'满18岁，男女不限，叠衣服贴标',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:77,title:'天心区特产打包',salary:'100-180元/天',area:'黄兴广场/五一广场',district:'天心区',wechat:'sleepyhead997',requirements:'男女不限，协助打包特产补货整理礼盒',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:78,title:'岳麓区活动协助',salary:'130元/天+包餐',area:'岳麓区',district:'岳麓区',wechat:'BINAO66666666',requirements:'18-45岁，男女不限，协助打杂清理物料',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:79,title:'望城京东日结',salary:'15元/小时',area:'京东亚洲一号物流园',district:'望城区',wechat:'xi-xi-dd1',requirements:'18-50岁，男女不限，仓库打杂',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:80,title:'卡通尼儿童乐园',salary:'130元/天',area:'长沙荟聚',district:'岳麓区',wechat:'lijie998802',requirements:'16-48岁，男女不限，引导陪同小孩玩',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:81,title:'侯家塘贺龙安保',salary:'有证外场140/内场120',area:'侯家塘贺龙附近',district:'天心区',wechat:'li17873991112',requirements:'满18岁，170+身高，有保安证',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:82,title:'京东快递电商打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园/万纬物流园',district:'雨花区',wechat:'Yunyun525888',requirements:'18-50岁，男女不限',hours:'',shift:'白班/晚班',date:'2026-05-15',sources:['长沙易职']},
+{id:83,title:'零食很大',salary:'220元/天',area:'雨花区/星沙/芙蓉区/岳麓区/长沙县',district:'多区域',wechat:'19375173727',requirements:'男女不限，搬货物整理货架',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:84,title:'长沙县小件扫描',salary:'分拣160/装卸180/天',area:'大地国际',district:'长沙县',wechat:'chang07098818',requirements:'20-50岁，男女不限，必须有快递经验',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:85,title:'短视频群演',salary:'160元/次',area:'天心区五一广场附近',district:'天心区',wechat:'QHGZS2022',requirements:'18-35岁，形象整洁，不怯镜头',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:86,title:'会议引导',salary:'150元/天',area:'开福区万达广场附近',district:'开福区',wechat:'VYJKL888',requirements:'男女不限，接待引导读者排队维持秩序',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:87,title:'会议布置',salary:'120元/天',area:'中南大学',district:'岳麓区',wechat:'a8851788',requirements:'18-40岁，男女不限，能做事',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:88,title:'长沙急招多岗位',salary:'12-20元/时或130-220元/天',area:'芙蓉/天心/岳麓/开福/雨花/长沙县',district:'多区域',wechat:'ax20251215',requirements:'18-50岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:89,title:'东百可乐打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园',district:'雨花区',wechat:'e15974298550',requirements:'男20岁以上女21岁以上',hours:'',shift:'白班/晚班',date:'2026-05-15',sources:['长沙易职']},
+{id:90,title:'芙蓉区婚礼打杂',salary:'180元/天+包吃',area:'芙蓉区',district:'芙蓉区',wechat:'Bravesteadfast',requirements:'18-45岁，男女不限，布场搬桌布景',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:91,title:'星沙邮政分拣',salary:'160元/天',area:'星沙',district:'长沙县',wechat:'a2545969810',requirements:'22-50岁，男生',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:92,title:'活动助手',salary:'150元/天+包餐水',area:'黄兴广场附近',district:'天心区',wechat:'K2401418815',requirements:'满18岁，认真负责',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:93,title:'湘江欢乐城暑假工',salary:'综合3000元+包吃包住',area:'岳麓区大王山湘江欢乐城景区',district:'岳麓区',wechat:'19973119390',requirements:'18-25岁，男生优先，项目接待员/秩序维护/救生员/客服/收银员',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:94,title:'运动品牌打包',salary:'22元/小时',area:'多区域',district:'多区域',wechat:'gg260105',requirements:'男女不限，做事细心踏实，中途不能玩手机',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:95,title:'雨花区医疗器材厂',salary:'16元/时+包吃三餐',area:'雨花区振东路可孚总部基地',district:'雨花区',wechat:'cyyco1016',requirements:'18-45岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:96,title:'小区保安短期',salary:'120元/天+包吃包住',area:'岳麓区/开福区/天心区/长沙县/雨花区/芙蓉区',district:'多区域',wechat:'tmumul888',requirements:'17-45岁，男女不限，无犯罪记录',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:97,title:'湘江欢乐城暑假工',salary:'2500-3000元+包吃住',area:'岳麓区欢乐城景区',district:'岳麓区',wechat:'WQ13077192075WQ',requirements:'在读生，身高160以上，持健康证',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:98,title:'肯德基兼职',salary:'14-18.5元/小时',area:'全湖南省多门店就近安排',district:'多区域',wechat:'MiManchi-SanSui',requirements:'18-55岁，夜班+5元补贴',hours:'',shift:'夜班',date:'2026-05-15',sources:['长沙易职']},
+{id:99,title:'山姆会员店',salary:'21-22元/小时',area:'岳麓区',district:'岳麓区',wechat:'qiaozhiyou555',requirements:'生鲜转运男18-40岁/保洁22-48岁/推车男20-40岁',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+{id:100,title:'北辰国际会议中心活动',salary:'100元/天+包餐包水',area:'开福区北辰国际会议中心',district:'开福区',wechat:'yj5181988',requirements:'18-35岁，男女不限',hours:'',shift:'',date:'2026-05-15',sources:['长沙易职']},
+
+// === 长沙职多多 ===
+{id:101,title:'京东快递电商打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园/万纬物流园',district:'雨花区',wechat:'Yunyun525888',requirements:'18-50岁，男女不限',hours:'',shift:'白班/晚班',date:'2026-05-16',sources:['长沙职多多']},
+{id:102,title:'芙蓉区婚礼打杂',salary:'180元/天+包吃',area:'芙蓉区',district:'芙蓉区',wechat:'Bravesteadfast',requirements:'18-45岁，男女不限，布场搬桌布景',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:103,title:'密室逃脱',salary:'170元/天+包餐',area:'全长沙可就近安排',district:'多区域',wechat:'jianlai123nb',requirements:'18-35岁，男女不限',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:104,title:'长沙县电商仓库',salary:'17元/小时',area:'长沙县',district:'长沙县',wechat:'ccd66828',requirements:'18-45岁，男女不限，无需体检，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:105,title:'花店兼职',salary:'140元/天+包餐水',area:'五一广场/德思勤等',district:'多区域',wechat:'19084639214',requirements:'18-35岁，男女不限，整理花架搬运花盆',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:106,title:'顺丰小件锁包',salary:'185元/天+包工作餐',area:'长沙县环通物流园',district:'长沙县',wechat:'1149931216',requirements:'19-48岁，男女不限，无犯罪记录，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:107,title:'超市搬运工',salary:'200元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'lcllb33',requirements:'有责任心，干活勤快听从安排',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:108,title:'望城坐班电子厂',salary:'21元/小时',area:'望城区',district:'望城区',wechat:'yhuaiyu6885',requirements:'18-40岁，男女不限，空调车间，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:109,title:'VR体验馆',salary:'160元/天+包餐水',area:'多区域',district:'多区域',wechat:'jzr224456',requirements:'稳重细心，态度亲和，男女不限',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:110,title:'会议引导',salary:'150元/天',area:'开福区万达广场附近',district:'开福区',wechat:'yzdddi',requirements:'接待引导读者排队维持秩序',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:111,title:'图书馆',salary:'160元/天+包午饭',area:'黄兴广场/德思勤/湖南图书馆',district:'多区域',wechat:'jf1817553532',requirements:'18-45岁，男女不限，整理书籍搬运图书',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:112,title:'蛋糕店打包',salary:'16元/小时',area:'罐子岭地铁口',district:'望城区',wechat:'fy122165',requirements:'18-28岁，不留长指甲，做事仔细，有健康证优先',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:113,title:'东百可乐打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园',district:'雨花区',wechat:'e15974298550',requirements:'男20岁以上女21岁以上',hours:'',shift:'白班/晚班',date:'2026-05-16',sources:['长沙职多多']},
+{id:114,title:'湘江欢乐城暑假工',salary:'综合3000元+包吃包住',area:'岳麓区大王山湘江欢乐城景区',district:'岳麓区',wechat:'19973119390',requirements:'18-25岁，男生优先，项目接待员/秩序维护/救生员/客服/收银员',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:115,title:'灵官渡安保',salary:'140元/天',area:'灵官渡地铁站附近',district:'天心区',wechat:'luoqilin555',requirements:'18-45岁，男生170cm以上，无犯罪记录无纹身染发',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:116,title:'餐饮店服务生',salary:'120元/天+包3餐',area:'万家丽/洋湖湿地/月亮岛西/梅溪湖等',district:'多区域',wechat:'Catbb0529',requirements:'17-45岁，穿长裤，传菜服务收餐摆台',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:117,title:'长沙县协助',salary:'130元/天+包餐包水',area:'长沙县',district:'长沙县',wechat:'BINAO66666666',requirements:'男女不限，布置现场整理物料',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:118,title:'零食店理货',salary:'120元/天',area:'芙蓉广场地铁站附近',district:'芙蓉区',wechat:'Catbb0529',requirements:'17-42岁，男女不限，无染发纹身外露',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:119,title:'电视剧群演',salary:'80元/天+管饭管水',area:'贺龙体育馆旁/星沙地铁站/五一广场',district:'多区域',wechat:'Catbb0529',requirements:'18-35岁，头发无明显亮色，无美甲',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:120,title:'物料装袋',salary:'110元/天+包餐水',area:'贺龙体育馆',district:'天心区',wechat:'Lovoecat033',requirements:'手脚麻利，干活勤快，男女不限',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:121,title:'饿了么校园活动',salary:'120元/天',area:'湖南工商大学',district:'岳麓区',wechat:'CCTY699',requirements:'认真负责，2女1男，外向开朗',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:122,title:'开福区电商仓库长期',salary:'16元/h+0-3元绩效',area:'开福区',district:'开福区',wechat:'ccd66828',requirements:'20-45岁，男女不限，奶茶小料打包分类拣货，包住包餐',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:123,title:'长沙火车站安检员',salary:'150元/班次周结',area:'长沙火车站',district:'芙蓉区',wechat:'ccd66828',requirements:'女性18-40岁，身高1.5米以上，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:124,title:'图书馆',salary:'180元/天+包午饭',area:'黄兴广场/德思勤/湖南图书馆',district:'多区域',wechat:'lcllb33',requirements:'18-45岁，男女不限，整理书籍搬运图书',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:125,title:'5.23贺龙安保',salary:'有证外场140/内场120',area:'侯家塘贺龙体育场',district:'天心区',wechat:'V15211050779',requirements:'男170+女160+，18-45岁，短发无烫染，女生必须有保安证',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:126,title:'玩偶扮演',salary:'170元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'yzdddi',requirements:'有责任心，不能偷懒',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:127,title:'妈妈驿站',salary:'20元/小时',area:'福元大桥西地铁口150米',district:'开福区',wechat:'fy122165',requirements:'做事认真，周末两天必须连做',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:128,title:'饮料促销员',salary:'100元/天',area:'星麓美式篮球中心',district:'多区域',wechat:'zqisme147',requirements:'30岁以下女士',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:129,title:'景区新媒体运营',salary:'120元/天周结',area:'橘子洲景区',district:'岳麓区',wechat:'Xia062206',requirements:'会小红书等平台推广文案，会剪辑拍摄优先',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:130,title:'望城京东',salary:'15元/小时',area:'望城京东亚洲一号物流园',district:'望城区',wechat:'ch10186437',requirements:'18-50岁，男女不限，仓库打杂',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:131,title:'黄花保税区电商',salary:'14元/小时+包两餐',area:'黄花保税区',district:'长沙县',wechat:'ch10186437',requirements:'16-45岁，男女不限，小件化妆品打包贴标签',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:132,title:'开福区菜鸟',salary:'16元/小时+包餐',area:'开福区深国际物流园',district:'开福区',wechat:'e15974298550',requirements:'18-50岁，男女不限，打包奶茶类零食',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:133,title:'望城京东白晚班',salary:'15-19元/小时',area:'望城普洛斯物流园/望城京东亚洲一号物流园',district:'望城区',wechat:'15507390427',requirements:'18-54岁，男女不限，可乐打包/快递打包分拣',hours:'',shift:'晚班',date:'2026-05-16',sources:['长沙职多多']},
+{id:134,title:'餐饮兼职服务员',salary:'15元/小时+包两餐',area:'多区域',district:'多区域',wechat:'c516930805',requirements:'18岁以上男性，必须有经验，无美甲纹身染发',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:135,title:'丰树御泥坊',salary:'16元/小时+包吃',area:'岳麓区丰树物流园一期拙燕仓',district:'岳麓区',wechat:'18163669468',requirements:'16-45岁，女生，物品包装拣货理货扫描，做到6月20日',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:136,title:'中兴电子厂',salary:'20元/小时',area:'岳麓区麓谷电子厂',district:'岳麓区',wechat:'19973119390',requirements:'18-38岁，男女不限，无案底无明显纹身，光猫路由器组装打包测试，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:137,title:'梅溪湖步步高保安',salary:'日结90+20全勤',area:'岳麓区梅溪湖步步高超市',district:'岳麓区',wechat:'17752897663',requirements:'男18-50岁，身高170以上，无案底无纹身染发，包吃包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:138,title:'金茂售楼处保安',salary:'日结140+20全勤',area:'岳麓区象鼻窝地铁站附近',district:'岳麓区',wechat:'17752892767',requirements:'男18-30岁，身高178以上，无案底无纹身染发，最少做三个月，包吃包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:139,title:'资料整理文员',salary:'150元/天',area:'岳麓区汽车西站西T1写字楼',district:'岳麓区',wechat:'Nikezxc0613',requirements:'18-35岁，细心不马虎，无需经验',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:140,title:'德思勤日结160',salary:'160元/天',area:'雨花区德思勤城市广场',district:'雨花区',wechat:'smj092527',requirements:'18-40岁，男女不限，商超餐饮协助理货收银打包',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:141,title:'瑞幸咖啡仓库',salary:'240-260元/天',area:'长沙庆星产业园（3号线广生地铁站附近）',district:'长沙县',wechat:'17674048697',requirements:'18岁以上，男女不限，需要长沙本地食品健康证，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+{id:142,title:'麓谷嘉诺工厂',salary:'18元/小时',area:'岳麓区湖南尤艾科汽车',district:'岳麓区',wechat:'15507390427',requirements:'男性18-35岁，操作员质检员',hours:'',shift:'',date:'2026-05-16',sources:['长沙职多多']},
+
+// === 长沙这有钱赚 ===
+{id:143,title:'瑞幸咖啡仓库分拣',salary:'240-260元/天',area:'长沙庆星产业园（3号线广生地铁站附近）',district:'长沙县',wechat:'17674048697',requirements:'18岁以上，男女不限，需要长沙本地食品健康证，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙这有钱赚']},
+{id:144,title:'麓谷嘉诺工厂',salary:'18元/小时',area:'岳麓区湖南尤艾科汽车',district:'岳麓区',wechat:'15507390427',requirements:'男性18-35岁，操作员质检员',hours:'',shift:'',date:'2026-05-16',sources:['长沙这有钱赚']},
+{id:145,title:'开福区白班日结',salary:'15元/小时+包吃工作餐',area:'开福区深国际物流园',district:'开福区',wechat:'x5z_9q',requirements:'18-48岁，男女不限，奶茶配料打包质检分类拣货',hours:'',shift:'白班',date:'2026-05-16',sources:['长沙这有钱赚']},
+{id:146,title:'运动品牌打包',salary:'22元/小时',area:'多区域',district:'多区域',wechat:'gg260105',requirements:'男女不限，做事细心踏实，中途不能玩手机',hours:'',shift:'',date:'2026-05-16',sources:['长沙这有钱赚']},
+{id:147,title:'A10促销员',salary:'3500-5000元/月',area:'多区域',district:'多区域',wechat:'13786105661',requirements:'女性，18-42岁，形象较好，有促销能力',hours:'',shift:'',date:'2026-05-16',sources:['长沙这有钱赚']},
+{id:148,title:'儿童游乐园检票员',salary:'180元/天+包餐',area:'多区域',district:'多区域',wechat:'yzdddi',requirements:'男女不限，检票验券引导游客',hours:'',shift:'',date:'2026-05-16',sources:['长沙这有钱赚']},
+{id:149,title:'长沙县电商猫粮打包',salary:'15元/小时',area:'黄花机场附近跨境物流电商仓库',district:'长沙县',wechat:'ch10186437',requirements:'18-50岁，男女不限，优先男生',hours:'',shift:'',date:'2026-05-16',sources:['长沙这有钱赚']},
+{id:150,title:'望城普洛斯',salary:'15元/小时',area:'望城普洛斯物流园',district:'望城区',wechat:'ch10186437',requirements:'18-50岁，男女不限，可乐打包',hours:'',shift:'',date:'2026-05-16',sources:['长沙这有钱赚']},
+{id:151,title:'雨花电商打包',salary:'白班16/h晚班17/h',area:'雨花区东百物流园',district:'雨花区',wechat:'chang07098818',requirements:'18-50岁，男女不限',hours:'',shift:'白班/晚班',date:'2026-05-16',sources:['长沙这有钱赚']},
+
+// === 长沙职达 ===
+{id:152,title:'外卖打包',salary:'180元/天+包餐',area:'开福区/芙蓉区',district:'多区域',wechat:'h81213_146',requirements:'20-45岁，男女不限，认真做事麻利',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:153,title:'望城马桥河路远博云仓',salary:'打包15/装卸18/时',area:'望城区马桥河路远博云仓',district:'望城区',wechat:'17674048697',requirements:'男女不限，提前注册兼雇宝小程序',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:154,title:'麓谷电子厂',salary:'16-17元/小时',area:'长沙麓谷企业广场A3栋',district:'岳麓区',wechat:'15507390427',requirements:'20-38岁男生，打螺丝电子仪器装配',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:155,title:'柠季助推',salary:'140元',area:'国金中心',district:'芙蓉区',wechat:'K2401418815',requirements:'听从安排，干净整洁，不社恐，发试喝杯给路人',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:156,title:'丰树御泥坊',salary:'16元/小时+包吃',area:'岳麓区丰树物流园一期拙燕仓',district:'岳麓区',wechat:'18163669468',requirements:'16-45岁，女生，物品包装拣货理货扫描，做到6月20日',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:157,title:'中兴电子厂',salary:'20元/小时',area:'岳麓区麓谷电子厂',district:'岳麓区',wechat:'19973119390',requirements:'18-38岁，男女不限，无案底无明显纹身，光猫路由器组装打包测试，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:158,title:'雨花区高桥桌游店',salary:'200元/天',area:'雨花区高桥',district:'雨花区',wechat:'17773186502',requirements:'18-35岁，喜欢桌游，沟通流畅，有经验优先',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:159,title:'小酒馆服务员',salary:'180元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'lcllb33',requirements:'男女不限，为客人提供服务确保卫生',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:160,title:'星沙汽配厂周结',salary:'17.5-21.5元/时',area:'星沙（索恩格/博世）',district:'长沙县',wechat:'1149931216',requirements:'男20-40岁/女18-40岁，制作汽车零部件，包住包餐',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:161,title:'德思勤日结160',salary:'160元/天',area:'雨花区德思勤城市广场',district:'雨花区',wechat:'smj092527',requirements:'18-40岁，男女不限，商超餐饮协助理货收银打包',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:162,title:'商场巡场',salary:'180元/天+包两餐',area:'多区域',district:'多区域',wechat:'17145903694',requirements:'男女不限，楼层巡场指引顾客路线秩序维护',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:163,title:'VR体验馆',salary:'160元/天+包餐水',area:'多区域',district:'多区域',wechat:'jzr224456',requirements:'稳重细心，态度亲和，男女不限',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:164,title:'密室逃脱检票',salary:'160元/天+包餐',area:'岳麓万象城/五一广场/万家丽/德思勤/星沙吾悦',district:'多区域',wechat:'Fik17908495566',requirements:'满18岁，男女不限，检票验券卫生清理引导顾客',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:165,title:'火车站安检员',salary:'150元/班次周结',area:'长沙火车站',district:'芙蓉区',wechat:'FUSus188',requirements:'女性18-40岁，身高1.5米以上，包住',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+{id:166,title:'中联机械园普工',salary:'280-380元/天',area:'中联机械园',district:'多区域',wechat:'yhuaiyu6885',requirements:'20-40岁男性，需要体检60-80元，能吃苦',hours:'',shift:'',date:'2026-05-16',sources:['长沙职达']},
+
+// === 长沙职业圈 2026-05-17 新增 ===
+{id:167,title:'毕业季大学兼职',salary:'日结',area:'大学城',district:'岳麓区',wechat:'长沙职业圈',requirements:'18岁以上，男女不限，快递发传单/打包/分拣，6月份开始',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:168,title:'试喝促销员',salary:'120元/天',area:'多区域',district:'多区域',wechat:'长沙职业圈',requirements:'女生，20-35岁，必须有促销经验，无美甲，外向热情',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:169,title:'周末活动助手',salary:'150元/天+包饭包水',area:'五一广场附近君悦酒店',district:'芙蓉区',wechat:'lh273056199',requirements:'男女不限，8人，布置现场打杂搞卫生',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:170,title:'娃娃机补货',salary:'180元/天+包餐水',area:'万家丽国际购物广场/友阿百货/开福万达广场',district:'多区域',wechat:'nian0618nian',requirements:'18-55岁，男女不限，协助门店补货',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:171,title:'密室逃脱兼职',salary:'180元/天+包餐',area:'全长沙可就近安排',district:'多区域',wechat:'jianlai123nb',requirements:'18-35岁，男女不限，室内辅助玩家游戏整理卫生',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:172,title:'电影检票员',salary:'150元/天',area:'多区域',district:'多区域',wechat:'MM020066688',requirements:'男女不限，有无经验均可，检票维护秩序',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:173,title:'停车场秩序员',salary:'150元/天+包餐',area:'城铁生态动物园停车场',district:'天心区',wechat:'wangff016',requirements:'20-50岁男生，引导车辆维护秩序',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:174,title:'零食很大零食店',salary:'220元/天',area:'雨花区/星沙/芙蓉/岳麓/长沙县',district:'多区域',wechat:'Bravesteadfast',requirements:'男女不限，搬货物整理货架，饮料管够',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:175,title:'开福区菜鸟白班',salary:'16元/小时+包餐',area:'开福区深国际物流园',district:'开福区',wechat:'lh273056199',requirements:'18-50岁，男女不限，打包奶茶类零食',hours:'',shift:'白班',date:'2026-05-17',sources:['长沙职业圈']},
+{id:176,title:'零食打包',salary:'18元/小时',area:'雨花区/长沙县',district:'多区域',wechat:'18684939710',requirements:'18-30岁，多劳多得，包一餐',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:177,title:'折纸皮',salary:'16元/小时',area:'雨花宝湾物流园',district:'雨花区',wechat:'wbzdq99',requirements:'18岁以上男生，靠谱，折纸箱废纸皮',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:178,title:'特产店协助',salary:'110元/天',area:'黄兴广场',district:'天心区',wechat:'wan17735341610',requirements:'20-45岁，形象整洁，协助打包打杂邮寄商品',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:179,title:'学生活动充场',salary:'餐补30元',area:'岳麓区靳江路学校附近',district:'岳麓区',wechat:'llllli66668',requirements:'需带学生证验证身份，下午6:30-8:30',hours:'6:30-8:30',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:180,title:'活动现场协助',salary:'130元/天',area:'五一广场',district:'芙蓉区',wechat:'YovoeH--0320',requirements:'45岁以下男女不限，现场布置物料搬运维持秩序',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:181,title:'开福万达活动协助',salary:'160元/天',area:'开福万达广场',district:'开福区',wechat:'YT0101022',requirements:'16岁以上男女不限，节目结束后恢复桌椅杂事',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:182,title:'密室逃脱检票',salary:'160元/天',area:'岳麓万象城/五一广场/万家丽/德思勤/星沙吾悦',district:'多区域',wechat:'Tsy283222',requirements:'满18岁男女不限，检票验券卫生清理引导顾客',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:183,title:'中南大学助手',salary:'150元/天',area:'中南大学',district:'岳麓区',wechat:'a8851788',requirements:'18-40岁男女不限，拉线布置会场',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:184,title:'剧本杀NPC',salary:'170元/天+包吃',area:'德思勤店/万家丽店/黄兴广场店',district:'多区域',wechat:'lcllb33',requirements:'有责任心，检票维护秩序，空闲可休息',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:185,title:'长沙急招多岗位',salary:'12-20元/时或130-220元/天',area:'芙蓉/天心/岳麓/开福/雨花/长沙县',district:'多区域',wechat:'ax20251215',requirements:'18-50岁男女不限，安保/安检/传单派发/活动协助/酒店服务员',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:186,title:'洋湖荟聚卡通尼打杂',salary:'160元/天+包吃',area:'岳麓区洋湖荟聚',district:'岳麓区',wechat:'RongLuckyovoy',requirements:'男女不限，维护秩序搬运东西，负责听安排机灵',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:187,title:'书店打杂',salary:'130元/天',area:'五一广场',district:'芙蓉区',wechat:'benyy77',requirements:'45岁以下男女不限，摆放整理分类书籍',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:188,title:'长沙多岗位日结',salary:'12-16元/小时或110-140元/天',area:'天心区/芙蓉区/岳麓区/雨花区/长沙县',district:'多区域',wechat:'e15974298550',requirements:'服务员/发传单/分拣/保安/洗碗工/水果打包/演唱会保安等',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:189,title:'望城京东白班',salary:'15元/小时',area:'京东物流亚洲一号物流园',district:'望城区',wechat:'chang07098818',requirements:'18-50岁男生，整理仓库快递打包分拣，次日结算',hours:'',shift:'白班',date:'2026-05-17',sources:['长沙职业圈']},
+{id:190,title:'活动助手',salary:'150元/天+包餐水',area:'黄兴广场附近',district:'天心区',wechat:'K2401418815',requirements:'满18岁，工作认真负责，帮忙做事协助打杂',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:191,title:'女兼职协助打杂',salary:'150元/天',area:'京东mall',district:'多区域',wechat:'syxx030407',requirements:'女生，30岁以内，灵范靠谱',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:192,title:'品牌店秀场穿衣工',salary:'100-200元/天',area:'长沙IFS',district:'芙蓉区',wechat:'LIVE0011TT',requirements:'必须有秀场换衣活动经验，细心认真反应快，一身黑无logo',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:193,title:'24h图书馆兼职',salary:'120元/天+包午饭',area:'黄兴广场/德思勤/湖南图书馆',district:'多区域',wechat:'LovH_february13',requirements:'18-45岁男女不限，整理书籍搬运图书',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:194,title:'会议现场协助',salary:'150元/天+包餐包水',area:'北辰三角洲',district:'开福区',wechat:'zzmnba0718',requirements:'男女不限，守时靠谱，会场引导签到资料发放',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:195,title:'零食很大零食店',salary:'220元/天',area:'雨花区/星沙/芙蓉/岳麓/长沙县',district:'多区域',wechat:'19095676672',requirements:'男女不限，搬货物整理货架，饮料管够',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:196,title:'室内游戏辅助',salary:'180元/天',area:'万家丽/五一广场',district:'多区域',wechat:'lin18692278148',requirements:'18-35岁男女不限，辅助玩家游戏角色扮演',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:197,title:'花店兼职',salary:'160元/天+包餐水',area:'黄兴广场/德思勤等',district:'多区域',wechat:'19095676672',requirements:'18-45岁男女不限，整理花架搬运花盆，室内有空调',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:198,title:'酒店日结兼职',salary:'160元/天+包餐',area:'五一广场附近',district:'芙蓉区',wechat:'Tkh15173275864',requirements:'男女不限，酒店秩序维护签到等',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:199,title:'长沙县长白班周结工',salary:'16-19元/小时',area:'长沙县创业乐园',district:'长沙县',wechat:'xl15674844174',requirements:'18-45岁男生，上料组装冲压包装，包吃住，月综合5000-6000',hours:'',shift:'白班',date:'2026-05-17',sources:['长沙职业圈']},
+{id:200,title:'电影院兼职',salary:'18元/小时',area:'万达影院',district:'多区域',wechat:'13874813326',requirements:'18-40岁，影院检票入场场次引导影厅巡场',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:201,title:'5.20鲜花打包',salary:'130元/天',area:'全长沙市就近安排',district:'多区域',wechat:'16673277707',requirements:'18岁以上男女不限，工作认真负责',hours:'',shift:'',date:'2026-05-17',sources:['长沙职业圈']},
+{id:202,title:'外卖骑手配送员',salary:'200-300元/天(日结)',area:'开福区德雅路口附近3公里',district:'开福区',wechat:'58同城',requirements:'18-50岁，会骑电动车会看导航，按单结算多劳多得',hours:'时间自由',shift:'',date:'2026-05-13',sources:['58同城']},
+{id:203,title:'外卖骑手配送员',salary:'200-300元/天(日结)',area:'芙蓉/开福/岳麓多区域就近安排',district:'多区域',wechat:'58同城',requirements:'18-55岁，会骑电动车，时间自由自己安排',hours:'时间自由',shift:'',date:'2026-05-16',sources:['58同城']},
+{id:204,title:'人偶兼职(城市英雄大悦城)',salary:'140元/天',area:'北辰三角洲大悦城三楼',district:'开福区',wechat:'1323748****',requirements:'无经验可上，站40分钟休息20分钟，每天提前15分钟打卡',hours:'13:30-21:30',shift:'',date:'2026-05-17',sources:['长沙兼职企鹅']},
+{id:205,title:'电视台采访摄像',salary:'30元/小时',area:'长沙市各大公园/商场/游乐场',district:'多区域',wechat:'1862955****',requirements:'长相亲和口齿清晰，善于和孩子沟通，大学生亦可',hours:'工作日17:00-21:00/周末10:00-16:00或16:00-21:00',shift:'',date:'2026-05-17',sources:['长沙兼职企鹅']},
+{id:206,title:'分拣搬运工(白/中/晚班)',salary:'早班230/中班240/晚班240(12H)',area:'岳麓区金桥路与金南路交汇处',district:'岳麓区',wechat:'智联招聘',requirements:'18-55岁男女不限(7:3)，无犯罪记录，小件分拣扫描，包吃住',hours:'8:00-20:00/13:00-1:00/20:00-8:00',shift:'白班/中班/晚班',date:'2026-05-17',sources:['智联招聘']},
+{id:207,title:'话务员',salary:'110底薪+提成(日结)',area:'开福区开福寺地铁站3号出口',district:'开福区',wechat:'长沙兼多多',requirements:'18-35岁女生，话务员经验优先，教育类正规机构',hours:'10:00-19:00(中间休息2小时)',shift:'',date:'2026-05-17',sources:['长沙兼多多']},
+{id:208,title:'装卸搭建兼职',salary:'300元/人',area:'芙蓉区解放西路/黄兴北路/建湘路',district:'芙蓉区',wechat:'长沙兼多多',requirements:'18-45岁男性，需有搭建及装卸经验，需自带工具',hours:'17:00进场-次日4:00撤场',shift:'晚班',date:'2026-05-17',sources:['长沙兼多多']},
+{id:209,title:'盒马促销员',salary:'130元/天',area:'喜盈门',district:'多区域',wechat:'长沙兼多多',requirements:'需健康证，12:30-21:00',hours:'12:30-21:00',shift:'',date:'2026-05-17',sources:['长沙兼多多']},
+{id:210,title:'德思勤路演活动',salary:'180元/天',area:'雨花区德思勤一楼大厅',district:'雨花区',wechat:'长沙兼多多',requirements:'男175/女165以上，体态偏瘦，有促销经验，无夸张染发刺身，必须10天做完',hours:'10:00-22:00',shift:'',date:'2026-05-17',sources:['长沙兼多多']},
+{id:211,title:'外卖骑手配送员(雨花区)',salary:'39元/小时(日结)',area:'雨花区万家丽南路/曙光路就近安排',district:'雨花区',wechat:'58同城',requirements:'18-55岁，会骑电动车，6-15元/单，时间自由',hours:'时间自由',shift:'',date:'2026-05-17',sources:['58同城']},
+{id:212,title:'世纪金源酒店服务生',salary:'12元/小时+包餐',area:'开福区马厂(1号线马厂站)',district:'开福区',wechat:'智联招聘',requirements:'16岁以上，自备黑色鞋子裤子，无明显纹身染发，晚班包住',hours:'17:00-23:00/10:00-16:00',shift:'晚班/白班',date:'2026-05-17',sources:['智联招聘']},
+{id:213,title:'圣爵菲斯酒店服务生',salary:'12元/小时+包餐',area:'开福区月湖公园地铁站',district:'开福区',wechat:'智联招聘',requirements:'16岁以上，自备黑色鞋子裤子，无明显纹身染发',hours:'10:30-16:00',shift:'',date:'2026-05-17',sources:['智联招聘']},
+{id:214,title:'超市配送(零食饮料)',salary:'350元/天(日结)',area:'雨花区凯德广场沃尔玛',district:'雨花区',wechat:'智联招聘',requirements:'会骑电动车，超市配送送零食饮料，定点取货，包吃',hours:'10:00-20:00',shift:'',date:'2026-05-17',sources:['智联招聘']},
+{id:215,title:'配送牛奶(生鲜会员店)',salary:'320元/天(日结)',area:'芙蓉区三湘汽车用品城',district:'芙蓉区',wechat:'前程无忧',requirements:'无需经验，一趟5单起每单6-8块，日人均40-70单，包住提供车辆',hours:'10:00-14:00/17:00-21:00',shift:'',date:'2026-05-17',sources:['前程无忧']},
+{id:216,title:'晚班服务员',salary:'6000-8000元/月',area:'雨花区高铁南站长沙大道地铁站',district:'雨花区',wechat:'前程无忧',requirements:'18-35岁男女不限，形象良好沟通能力强，无经验可培训',hours:'晚班',shift:'晚班',date:'2026-05-17',sources:['前程无忧']},
+{id:217,title:'图文橱窗电商带货',salary:'130元/天(日结)',area:'长沙路捷物流',district:'多区域',wechat:'前程无忧',requirements:'18岁以上男女不限，维护店铺上下架商品，不直播，出单分成',hours:'时间自由不坐班',shift:'',date:'2026-05-17',sources:['前程无忧']},
+{id:218,title:'零食很忙理货',salary:'200-300元/天(日结)',area:'芙蓉区IFS国金中心',district:'芙蓉区',wechat:'BOSS直聘',requirements:'经验不限，时间自由自行安排，人走账清不压工资',hours:'时间自由',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:219,title:'电话客服专员',salary:'130-230元/天(日结)',area:'岳麓区天祥水晶湾',district:'岳麓区',wechat:'BOSS直聘',requirements:'1年以内经验，电话联系客户介绍产品服务，办公室坐班',hours:'不限',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:220,title:'剧本杀桌游主持人',salary:'3000-7000元/月',area:'岳麓区湘腾城市广场',district:'岳麓区',wechat:'BOSS直聘',requirements:'形象整洁，普通话标准，理解能力强，性格开朗，有夜班补助',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:221,title:'日结兼职+在家可做',salary:'30-50元/时',area:'雨花区',district:'雨花区',wechat:'智联招聘',requirements:'经验不限学历不限，售前客服，在线生活服务',hours:'时间自由',shift:'',date:'2026-05-17',sources:['智联招聘']},
+{id:222,title:'暑期暑假工兼职(一天一结)',salary:'180-220元/天',area:'天心区城南路',district:'天心区',wechat:'BOSS直聘',requirements:'经验不限学历不限，可接受小白',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:223,title:'奶茶店店员',salary:'4000-6000元/月',area:'芙蓉区东屯渡',district:'芙蓉区',wechat:'BOSS直聘',requirements:'经验不限，初中及以上',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:224,title:'传单派发(开福)',salary:'120元/天(日结)',area:'开福区湘江世纪城',district:'开福区',wechat:'兼职猫',requirements:'性别不限，责任心强，工作时间灵活',hours:'时间灵活',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:225,title:'工艺品店人偶派发传单',salary:'140元/天(日结)',area:'雨花区',district:'雨花区',wechat:'兼职猫',requirements:'性别不限，穿人偶服派发传单',hours:'时间灵活',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:226,title:'人偶派单(岳麓)',salary:'130元/天(日结)',area:'岳麓区',district:'岳麓区',wechat:'兼职猫',requirements:'性别不限，穿人偶服派单，包吃',hours:'时间灵活',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:227,title:'人偶扮演发单(天心)',salary:'150元/天(日结)',area:'天心区',district:'天心区',wechat:'兼职猫',requirements:'性别不限，穿人偶服发传单',hours:'时间灵活',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:228,title:'小件搬运工',salary:'300元/天(日结)',area:'芙蓉区马王堆市场',district:'芙蓉区',wechat:'兼职猫',requirements:'能吃苦耐劳，服从安排，长期做可包住',hours:'',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:229,title:'会展安保',salary:'180元/天(日结)',area:'天心区侯家塘地铁站',district:'天心区',wechat:'兼职猫',requirements:'性别不限，维持秩序，协助处理突发情况，包吃住',hours:'09:00-22:00',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:230,title:'传单派发(天心)',salary:'200元/天(日结)',area:'天心区',district:'天心区',wechat:'兼职猫',requirements:'性别不限，有提成，包吃',hours:'',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:231,title:'电影查票员',salary:'200元/天(日结)',area:'芙蓉区各区域就近安排',district:'芙蓉区',wechat:'兼职猫',requirements:'17-29岁，有无经验均可，查票派发3D眼镜场务协助，包两餐',hours:'6-8小时/天',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:232,title:'电影查票员(天心)',salary:'200元/天(日结)',area:'天心区各区域就近安排',district:'天心区',wechat:'兼职猫',requirements:'17-29岁，有无经验均可，查票派发3D眼镜，包两餐',hours:'6-8小时/天',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:233,title:'前台收银',salary:'130元/天(日结)',area:'芙蓉区',district:'芙蓉区',wechat:'兼职猫',requirements:'性别不限，包吃',hours:'',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:234,title:'物业促销员',salary:'200元/天(完工结)',area:'岳麓区',district:'岳麓区',wechat:'兼职猫',requirements:'性别不限，免费培训',hours:'',shift:'',date:'2026-05-17',sources:['兼职猫']},
+{id:235,title:'发传单员',salary:'25元/小时(日结)',area:'长沙各高中/地铁站旁就近安排',district:'多区域',wechat:'58同城',requirements:'17-46岁，认真踏实，做的好的奖励20-50元/天',hours:'时间灵活',shift:'',date:'2026-05-13',sources:['58同城']},
+{id:236,title:'送水工人',salary:'400元/天(日结)',area:'芙蓉区识字岭',district:'芙蓉区',wechat:'鱼泡直聘',requirements:'急招5名，提供两轮电动车，包住包吃',hours:'',shift:'',date:'2026-05-12',sources:['鱼泡直聘']},
+{id:237,title:'邮政分拣搬运',salary:'白班130/晚班170(日结)',area:'长沙县开元东路118号',district:'长沙县',wechat:'智联招聘',requirements:'18-58岁，20人，分拣搬运',hours:'白班8:30-19:30/晚班19:30-8:30',shift:'白班/晚班',date:'2026-05-17',sources:['智联招聘']},
+{id:238,title:'望城宝湾物流打包',salary:'160元/天(日结)',area:'望城区宝湾物流园2仓',district:'望城区',wechat:'智联招聘',requirements:'17-50岁男女不限，快递包装拣货贴标，包两餐',hours:'9:00-21:00',shift:'白班',date:'2026-05-17',sources:['智联招聘']},
+{id:239,title:'线上客服(兼职可日结)',salary:'260元/天',area:'天心区',district:'天心区',wechat:'智联招聘',requirements:'经验不限学历不限，售前客服/数据处理',hours:'',shift:'',date:'2026-05-17',sources:['智联招聘']},
+{id:240,title:'超市配送员(天心)',salary:'6000-9000元/月',area:'天心区赤岭路',district:'天心区',wechat:'58同城',requirements:'无经验可学，包住包吃五险',hours:'',shift:'',date:'2026-05-17',sources:['58同城']},
+{id:241,title:'装配工(雨花)',salary:'20-35元/时',area:'雨花区',district:'雨花区',wechat:'鱼泡直聘',requirements:'20-35岁中专学历，自动化产品组装装配',hours:'',shift:'',date:'2026-05-12',sources:['鱼泡直聘']},
+{id:242,title:'仓管操作工(长白班)',salary:'320元/天',area:'芙蓉区五一大道',district:'芙蓉区',wechat:'鱼泡直聘',requirements:'20人以上，可带手机，长白班，包吃住',hours:'长白班',shift:'长白班',date:'2026-05-12',sources:['鱼泡直聘']},
+{id:243,title:'长白班装配工(长沙县)',salary:'10-20元/时',area:'长沙县',district:'长沙县',wechat:'鱼泡直聘',requirements:'3-5人，吃苦耐劳，包吃',hours:'长白班',shift:'长白班',date:'2026-05-12',sources:['鱼泡直聘']},
+{id:244,title:'外卖骑手(通泰街)',salary:'39元/小时(日结)',area:'开福区通泰街/湘江中路',district:'开福区',wechat:'58同城',requirements:'18-55岁，会骑电动车，按单结算5-20元/单，日结260-300',hours:'时间自由',shift:'',date:'2026-05-18',sources:['58同城']},
+{id:245,title:'外卖骑手(多区域)',salary:'39元/小时(日结)',area:'天心/岳麓/开福/芙蓉多区域',district:'多区域',wechat:'58同城',requirements:'18-50岁，会骑电动车会看导航，日结260-300',hours:'时间自由',shift:'',date:'2026-05-15',sources:['58同城']},
+{id:246,title:'大学生外卖骑手',salary:'220元/天(日结)',area:'雨花区粟塘小区',district:'雨花区',wechat:'智联招聘',requirements:'18-50岁，会骑车会导航，按单提成5.5-50元，包住提供车子',hours:'时间自由',shift:'',date:'2026-05-17',sources:['智联招聘']},
+{id:247,title:'茶颜悦色兼职',salary:'15-30元/时',area:'芙蓉区定王台',district:'芙蓉区',wechat:'BOSS直聘',requirements:'18岁以上全日制在校生，每周3天以上，能接受早中晚轮班',hours:'早中晚轮班',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:248,title:'海底捞钟点工',salary:'20-25元/时',area:'开福区湘江中路',district:'开福区',wechat:'BOSS直聘',requirements:'服务员/门迎/传菜/收台/洗碗等，13:00-17:00/18:00-22:00/22:00-02:00',hours:'13:00-17:00/18:00-22:00/22:00-02:00',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:249,title:'兼职家教老师',salary:'60-300元/时',area:'长沙各区域可自选',district:'多区域',wechat:'BOSS直聘',requirements:'本科及以上学历，一本及以上优先，上门家教',hours:'时间自由',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:250,title:'民宿保洁',salary:'150-260元/天',area:'雨花/岳麓/天心/开福/望城',district:'多区域',wechat:'BOSS直聘',requirements:'查房换洗四件套，一次性用品摆放，台面地面清理',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:251,title:'卢米埃影城兼职',salary:'20-25元/时',area:'岳麓区银盆岭',district:'岳麓区',wechat:'BOSS直聘',requirements:'检票散场售卖小食品电影票，每周2-5天，每班次4-8小时',hours:'4-8小时/班次',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:252,title:'步步高促销员',salary:'20-25元/时',area:'岳麓区含浦/砂之船/洋湖荟聚等',district:'岳麓区',wechat:'BOSS直聘',requirements:'45岁以下，需健康证，周末节假日兼职',hours:'周末节假日',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:253,title:'小象超市分拣',salary:'15-20元/时',area:'岳麓区阳光100',district:'岳麓区',wechat:'BOSS直聘',requirements:'18-40岁，分拣生鲜蔬菜，月结15号发薪',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:254,title:'盒马鲜生配送员',salary:'200-300元/天',area:'雨花区运达中央广场',district:'雨花区',wechat:'BOSS直聘',requirements:'18-48岁，会骑电动车，熟练使用导航',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:255,title:'代驾司机',salary:'220-350元/天',area:'芙蓉区韭菜园',district:'芙蓉区',wechat:'BOSS直聘',requirements:'C1驾龄3年以上，23-55岁，高德地图大平台派单',hours:'时间自由',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:256,title:'麦德龙学生兼职',salary:'110-120元/天',area:'开福区四方坪',district:'开福区',wechat:'BOSS直聘',requirements:'18岁以上在校大中专学生，能接受晚班13:00-22:00，周末需出勤',hours:'13:00-22:00',shift:'晚班',date:'2026-05-17',sources:['BOSS直聘']},
+{id:257,title:'咖啡师兼职',salary:'20-25元/时',area:'芙蓉区韭菜园',district:'芙蓉区',wechat:'BOSS直聘',requirements:'1-3年经验，大专，推荐产品促成销售',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:258,title:'大学城暑假兼职',salary:'20-30元/时',area:'岳麓区河西大学城',district:'岳麓区',wechat:'BOSS直聘',requirements:'普通话流利善于沟通，工作7个多小时，包吃包住',hours:'7小时',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:259,title:'兼职教师',salary:'120-150元/时',area:'芙蓉/雨花/岳麓区就近安排',district:'多区域',wechat:'BOSS直聘',requirements:'大专及以上，有半年以上教学经验，周一到周五下午',hours:'周一至周五下午',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:260,title:'ZARA店员',salary:'20-25元/时',area:'长沙各门店',district:'多区域',wechat:'BOSS直聘',requirements:'大专，经验不限，多元包容',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:261,title:'迪卡侬销售助理',salary:'15-25元/时',area:'长沙各门店',district:'多区域',wechat:'BOSS直聘',requirements:'经验不限，提供热情专业接待服务',hours:'',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:262,title:'线上兼职日结',salary:'70-150元/天',area:'开福区五一广场',district:'开福区',wechat:'BOSS直聘',requirements:'线上各平台推广公司海报，可接受无经验',hours:'时间自由',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:263,title:'遇南三火锅兼职',salary:'20-25元/时',area:'岳麓区望城坡',district:'岳麓区',wechat:'BOSS直聘',requirements:'18-35岁，周末兼职前厅后厨',hours:'周末',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:264,title:'钟点工白班保姆',salary:'20-60元/时',area:'天心区金盆岭',district:'天心区',wechat:'BOSS直聘',requirements:'全长沙安排，不推销不要证不培训也可上岗',hours:'时间自由',shift:'',date:'2026-05-17',sources:['BOSS直聘']},
+{id:265,title:'小红书兼职运营',salary:'1000-2000元',area:'芙蓉区定王台',district:'芙蓉区',wechat:'智联招聘',requirements:'经验不限学历不限，短视频平台新媒体运营，居家日结',hours:'时间自由',shift:'',date:'2026-05-17',sources:['智联招聘']},
+{id:266,title:'线上客服日结',salary:'30-50元/时',area:'长沙',district:'多区域',wechat:'智联招聘',requirements:'在家可做，经验不限，售前客服',hours:'时间自由',shift:'',date:'2026-05-17',sources:['智联招聘']}
+];
+
+// 获取区域的主区域
+function getMainArea(areaStr) {
+  if (!areaStr) return '多区域';
+  var areas = ['开福区','天心区','雨花区','岳麓区','芙蓉区','望城区','长沙县'];
+  for (var i = 0; i < areas.length; i++) {
+    if (areaStr.indexOf(areas[i]) !== -1) return areas[i];
+  }
+  if (areaStr.indexOf('线上') !== -1) return '线上';
+  return '多区域';
+}
+
+// 计算距离和通勤
+function calcInfo(district) {
+  var main = district || '多区域';
+  var cfg = areaConfig[main] || areaConfig['多区域'];
+  var dist = ((cfg.distMin + cfg.distMax) / 2).toFixed(1);
+  var commute = ((cfg.commuteMin + cfg.commuteMax) / 2).toFixed(0);
+  return {dist: dist, commute: commute, main: main};
+}
+
+// 状态
+var currentArea = 'all';
+var currentSort = 'default';
+
+// 渲染
+function render() {
+  var list = document.getElementById('jobList');
+  var filtered = rawData.filter(function(j) {
+    if (currentArea === 'all') return true;
+    return getMainArea(j.district) === currentArea;
+  });
+
+  // 排序
+  if (currentSort === 'distance') {
+    filtered.sort(function(a, b) {
+      return parseFloat(calcInfo(a.district).dist) - parseFloat(calcInfo(b.district).dist);
+    });
+  } else if (currentSort === 'commute') {
+    filtered.sort(function(a, b) {
+      return parseInt(calcInfo(a.district).commute) - parseInt(calcInfo(b.district).commute);
+    });
+  } else if (currentSort === 'salary') {
+    filtered.sort(function(a, b) {
+      return parseSalary(b.salary) - parseSalary(a.salary);
+    });
+  } else if (currentSort === 'date') {
+    filtered.sort(function(a, b) {
+      return (b.date || '').localeCompare(a.date || '');
+    });
+  }
+
+  document.getElementById('statsText').textContent = '共 ' + filtered.length + ' 条';
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state">暂无该区域的兼职信息</div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var j = filtered[i];
+    var info = calcInfo(j.district);
+    
+    // 来源标签
+    var sourceTags = '';
+    for (var s = 0; s < j.sources.length; s++) {
+      sourceTags += '<span class="source-tag">' + j.sources[s] + '</span>';
+    }
+    // 发布日期
+    var dateStr = j.date ? '<span style="margin-left:auto;font-size:11px;color:#999">📅 ' + j.date + '</span>' : '';
+    
+    // 距离信息（线上工作不显示）
+    var distanceHtml = '';
+    if (info.dist > 0) {
+      distanceHtml = '<span><strong>' + info.dist + 'km</strong></span><span>通勤约<strong>' + info.commute + '分钟</strong></span>';
+    } else {
+      distanceHtml = '<span>线上工作</span>';
+    }
+    
+    // 微信号显示
+    var wechatHtml = '';
+    if (j.wechat && j.wechat !== '未提供') {
+      wechatHtml = '<div class="info-row"><span class="icon">📱</span><span class="label">微信：</span><span class="value"><span class="wechat-display">' + j.wechat + '</span></span></div>';
+    }
+    
+    // 班次标签
+    var shiftHtml = '';
+    if (j.shift) {
+      var shiftClass = 'shift-unknown';
+      var shiftIcon = '🕐';
+      if (j.shift.indexOf('白班') >= 0 && j.shift.indexOf('晚班') >= 0) {
+        shiftClass = 'shift-day';
+        shiftIcon = '🔄';
+      } else if (j.shift.indexOf('白班') >= 0 || j.shift.indexOf('长白班') >= 0) {
+        shiftClass = 'shift-day';
+        shiftIcon = '☀️';
+      } else if (j.shift.indexOf('晚班') >= 0) {
+        shiftClass = 'shift-night';
+        shiftIcon = '🌙';
+      } else if (j.shift.indexOf('夜班') >= 0 || j.shift.indexOf('通宵') >= 0) {
+        shiftClass = 'shift-night';
+        shiftIcon = '🌃';
+      } else if (j.shift.indexOf('中班') >= 0) {
+        shiftClass = 'shift-mid';
+        shiftIcon = '🌤️';
+      } else if (j.shift.indexOf('全天') >= 0) {
+        shiftClass = 'shift-allday';
+        shiftIcon = '⏰';
+      }
+      shiftHtml = '<span class="shift-tag ' + shiftClass + '">' + shiftIcon + ' ' + j.shift + '</span>';
+    }
+
+    // 工时标签
+    var hoursHtml = '';
+    if (j.hours) {
+      hoursHtml = '<span class="shift-tag shift-mid">⏱️ ' + j.hours + '</span>';
+    }
+
+    // 班次工时行
+    var shiftRowHtml = '';
+    if (shiftHtml || hoursHtml) {
+      shiftRowHtml = '<div class="info-row"><span class="icon">⏰</span><span class="label">班次：</span><span class="value">' + shiftHtml + hoursHtml + '</span></div>';
+    }
+
+    // 要求行 - 解析并分类显示
+    var reqHtml = '';
+    if (j.requirements) {
+      var req = j.requirements;
+      // 提取年龄要求
+      var ageMatch = req.match(/(\d{1,2})[-~—](\d{1,2})岁/);
+      // 提取性别要求
+      var genderParts = [];
+      if (/女生|女性|仅女|限女/.test(req)) genderParts.push('女');
+      if (/男生|男性|仅男|限男/.test(req)) genderParts.push('男');
+      if (/男女不限/.test(req)) genderParts.push('男女不限');
+      // 提取身高要求
+      var heightMatch = req.match(/身高(\d+\.?\d*)[米cm以上]+/);
+      // 提取其他关键要求
+      var otherReqs = req;
+      // 移除已提取的部分，保留剩余
+      if (ageMatch) otherReqs = otherReqs.replace(ageMatch[0], '');
+      genderParts.forEach(function(g) { otherReqs = otherReqs.replace(g === '男女不限' ? '男女不限' : (g === '女' ? /女生|女性|仅女|限女/ : /男生|男性|仅男|限男/), ''); });
+      if (heightMatch) otherReqs = otherReqs.replace(heightMatch[0], '');
+      otherReqs = otherReqs.replace(/^[,，\s]+|[,，\s]+$/g, '').replace(/[,，]{2,}/g, '，');
+      
+      var tags = '';
+      if (ageMatch) tags += '<span class="req-tag">👤 ' + ageMatch[0] + '</span>';
+      if (genderParts.length) tags += '<span class="req-tag">🚻 ' + genderParts.join('/') + '</span>';
+      if (heightMatch) tags += '<span class="req-tag">📏 ' + heightMatch[0] + '</span>';
+      // 提取包吃住
+      if (/包吃|包餐|包饭|包3餐|包两餐|包中餐|包工作餐/.test(req)) tags += '<span class="req-tag">🍱 包餐</span>';
+      if (/包住/.test(req)) tags += '<span class="req-tag">🏠 包住</span>';
+      if (/包水/.test(req)) tags += '<span class="req-tag">💧 包水</span>';
+      // 提取经验/证件要求
+      if (/有经验|必须有经验|有促销经验|有地推经验|有秀场/.test(req)) tags += '<span class="req-tag req-extra">⚠️ 需经验</span>';
+      if (/健康证/.test(req)) tags += '<span class="req-tag req-extra">⚠️ 需健康证</span>';
+      if (/保安证/.test(req)) tags += '<span class="req-tag req-extra">⚠️ 需保安证</span>';
+      if (/无犯罪记录|无案底/.test(req)) tags += '<span class="req-tag">✅ 无犯罪记录</span>';
+      if (/无纹身|无明显纹身/.test(req)) tags += '<span class="req-tag">✅ 无纹身</span>';
+      if (/无染发|无烫染|短发/.test(req)) tags += '<span class="req-tag">✅ 无染发/短发</span>';
+      if (/无美甲/.test(req)) tags += '<span class="req-tag">✅ 无美甲</span>';
+      // 提取连续工作要求
+      if (/最少连续|必须连做|一个月起做|最少做三个月|最少做到/.test(req)) {
+        var durMatch2 = req.match(/(最少连续做\d+天|必须连做|一个月起做|最少做三个月|最少做到[\d.]+)/);
+        if (durMatch2) tags += '<span class="req-tag req-extra">📌 ' + durMatch2[0] + '</span>';
+      }
+      
+      // 剩余的其他要求
+      if (otherReqs && otherReqs.length > 1) {
+        tags += '<span class="req-tag">📝 ' + otherReqs + '</span>';
+      }
+      
+      reqHtml = '<div class="requirements-row"><span class="icon">📋</span> ' + tags + '</div>';
+    }
+    
+    // 操作按钮
+    var actionsHtml = '';
+    if (j.wechat && j.wechat !== '未提供') {
+      actionsHtml = '<button class="btn-wechat" onclick="copyWechat(this,\'' + j.wechat.replace(/'/g, "\\'") + '\')">复制微信</button>';
+    }
+    actionsHtml += '<button class="btn-map" onclick="openMap(\'' + j.area.replace(/'/g, "\\'") + '\')">📍 地图</button>';
+    
+    html += '<div class="job-card">' +
+      '<div class="card-header">' +
+        '<div class="title">' + j.title + '</div>' +
+        '<div class="salary">' + j.salary + '</div>' +
+      '</div>' +
+      '<div class="card-source">' + sourceTags + dateStr + '</div>' +
+      '<div class="card-info">' +
+        '<div class="info-row"><span class="icon">📍</span><span class="label">地址：</span><span class="value highlight">' + j.area + '</span></div>' +
+        shiftRowHtml +
+        wechatHtml +
+      '</div>' +
+      reqHtml +
+      '<div class="card-footer">' +
+        '<div class="distance-info">' + distanceHtml + '</div>' +
+        '<div class="actions">' + actionsHtml + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  list.innerHTML = html;
+}
+
+// 复制微信号
+function copyWechat(btn, wechat) {
+  var w = wechat.split('/')[0];
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(w).then(function() {
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = '复制微信';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  } else {
+    var input = document.createElement('input');
+    input.value = w;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    btn.textContent = '已复制';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = '复制微信';
+      btn.classList.remove('copied');
+    }, 1500);
+  }
+}
+
+// 打开地图
+function openMap(addr) {
+  var url = 'https://uri.amap.com/search?keyword=' + encodeURIComponent(addr) + '&city=长沙';
+  window.open(url, '_blank');
+}
+
+// 事件绑定
+document.getElementById('areaFilters').addEventListener('click', function(e) {
+  if (e.target.tagName === 'BUTTON') {
+    var buttons = document.querySelectorAll('#areaFilters button');
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].classList.remove('active');
+    }
+    e.target.classList.add('active');
+    currentArea = e.target.dataset.area;
+    render();
+  }
+});
+
+document.getElementById('sortSelect').addEventListener('change', function(e) {
+  currentSort = e.target.value;
+  render();
+});
+
+// 回到顶部
+window.addEventListener('scroll', function() {
+  var btn = document.getElementById('backToTop');
+  if (window.scrollY > 300) {
+    btn.classList.add('show');
+  } else {
+    btn.classList.remove('show');
+  }
+});
+
+// 初始化
+render();
+</script>
+</body>
+</html>
