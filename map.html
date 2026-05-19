@@ -693,7 +693,7 @@
         // 创建地图
         map = new AMap.Map('map-container', {
           center: CENTER_POSITION,
-          zoom: 12,
+          zoom: 13,
           viewMode: '2D'
         });
 
@@ -712,9 +712,11 @@
 
         // 添加中心点信息窗
         const homeInfo = new AMap.InfoWindow({
-          content: '<div style="padding:10px;font-size:13px;"><b>🏠 您的位置</b><br>万科城B区36栋<br>开福区马厂</div>',
+          content: '<div style="padding:10px;font-size:13px;"><b>🏠 您的位置</b><br>万科城B区36栋<br>开福区马厂<br>坐标: 112.995360, 28.247154</div>',
           offset: new AMap.Pixel(0, -32)
         });
+        // 默认打开信息窗
+        homeInfo.open(map, homeMarker.getPosition());
         homeMarker.on('click', function() {
           homeInfo.open(map, homeMarker.getPosition());
         });
