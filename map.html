@@ -219,7 +219,7 @@
     <div class="header-content">
       <div>
         <h1><i class="fas fa-map-marked-alt"></i> 长沙兼职地图</h1>
-        <div class="subtitle">以润和国际广场为中心</div>
+        <div class="subtitle">以万科城B区36栋为中心</div>
       </div>
       <button class="back-btn" onclick="location.href='index.html'">
         <i class="fas fa-arrow-left"></i> 返回列表
@@ -281,9 +281,9 @@
   <script src="https://webapi.amap.com/maps?v=1.4.15&key=761ed01bf7dab600b9fff5f0c292510b"></script>
 
   <script>
-    // 中心位置：润和国际广场
-    const CENTER_POSITION = [112.9388, 28.2281];
-    const CENTER_NAME = '润和国际广场';
+    // 中心位置：万科城B区36栋
+    const CENTER_POSITION = [112.995360, 28.247154];
+    const CENTER_NAME = '万科城B区36栋';
 
     // 兼职数据（266条真实数据，含精确坐标）
     const jobsData = [
@@ -700,7 +700,7 @@
         // 添加中心点标记（家）- 使用红色圆点
         const homeMarker = new AMap.Marker({
           position: CENTER_POSITION,
-          title: '您的位置：润和国际广场',
+          title: '您的位置：万科城B区36栋',
           icon: new AMap.Icon({
             size: new AMap.Size(32, 32),
             image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',
@@ -712,7 +712,7 @@
 
         // 添加中心点信息窗
         const homeInfo = new AMap.InfoWindow({
-          content: '<div style="padding:10px;font-size:13px;"><b>🏠 您的位置</b><br>润和国际广场<br>开福区福元西路96号</div>',
+          content: '<div style="padding:10px;font-size:13px;"><b>🏠 您的位置</b><br>万科城B区36栋<br>开福区马厂</div>',
           offset: new AMap.Pixel(0, -32)
         });
         homeMarker.on('click', function() {
